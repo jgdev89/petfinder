@@ -1,3 +1,5 @@
+from fastapi.security import OAuth2PasswordRequestForm
+from auth import crear_token
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
@@ -35,3 +37,12 @@ def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return usuario
+
+@router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.email == form_data.username).first()
+    if not usuario or not pwd_context.verify(form_data.password, usuario.password):
+        raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+    
+    token = crear_token({"sub": str(usuario.id)})
+    return {"access_token": token, "token_type": "bearer"}
