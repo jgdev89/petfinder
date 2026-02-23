@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 import models
 from routers import usuarios, mascotas
@@ -6,6 +7,14 @@ from routers import usuarios, mascotas
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="PetFinder API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(usuarios.router)
 app.include_router(mascotas.router)
