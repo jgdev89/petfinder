@@ -51,3 +51,29 @@ class MascotaResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# --- Mensajes ---
+
+# Lo que envía el frontend al crear un mensaje.
+# Solo necesita el contenido y a qué mascota y destinatario va dirigido.
+class MensajeCreate(BaseModel):
+    destinatario_id: int
+    mascota_id: Optional[int] = None
+    asunto: str
+    contenido: str
+
+# Lo que devuelve el backend al consultar mensajes.
+# Incluye todos los campos más los generados automáticamente (id, fecha, leido).
+class MensajeResponse(BaseModel):
+    id: int
+    remitente_id: int
+    destinatario_id: int
+    mascota_id: Optional[int]
+    asunto: str
+    contenido: str
+    leido: bool
+    fecha_envio: datetime
+
+    class Config:
+        from_attributes = True

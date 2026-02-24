@@ -43,3 +43,24 @@ export async function crearMascota(datos, token) {
     });
     return res.json();
 }
+
+export async function enviarMensaje(datos, token) {
+    const res = await fetch(`${BASE_URL}/mensajes/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+    });
+    return res.json();
+}
+
+export async function obtenerMensajes(token) {
+    const res = await fetch(`${BASE_URL}/mensajes/recibidos`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    return res.json();
+}   
