@@ -19,3 +19,27 @@ export async function login(email, password) {
     });
     return res.json();
 }
+
+export async function registrar(nombre, email, password, telefono) {
+    const res = await fetch(`${BASE_URL}/usuarios/registro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, password, telefono })
+    });
+    return res.json();
+}
+
+// Crea una mascota nueva en el backend.
+// Necesita el token JWT para identificar al usuario que la publica.
+// El token se envía en la cabecera Authorization con el formato "Bearer <token>".
+export async function crearMascota(datos, token) {
+    const res = await fetch(`${BASE_URL}/mascotas/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+    });
+    return res.json();
+}
