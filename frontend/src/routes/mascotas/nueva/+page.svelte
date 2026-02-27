@@ -1,10 +1,10 @@
 <script>
   import { crearMascota } from '$lib/api.js';
   import { token } from '$lib/auth.js';
+  import { ESPECIES, PROVINCIAS } from '$lib/datos.js';
   import { goto } from '$app/navigation';
   import { get } from 'svelte/store';
 
-  // Campos obligatorios
   let tipo = $state('perdida');
   let nombre = $state('');
   let especie = $state('');
@@ -12,8 +12,6 @@
   let provincia = $state('');
   let fecha_suceso = $state('');
   let descripcion = $state('');
-
-  // Campos opcionales
   let raza = $state('');
   let color = $state('');
 
@@ -24,19 +22,13 @@
     cargando = true;
     error = '';
 
-    // get() lee el valor actual del store fuera de un contexto reactivo.
-    // Es la forma de leer un store en una función normal (no en el template).
     const tokenActual = get(token);
 
     if (!tokenActual) {
-      // Si no hay token, el usuario no está logueado.
-      // Lo mandamos al login antes de que pueda publicar.
       goto('/login');
       return;
     }
 
-    // Construimos el objeto con los datos del formulario.
-    // Los campos opcionales solo se incluyen si tienen valor.
     const datos = {
       tipo,
       nombre: nombre || null,
@@ -52,8 +44,6 @@
     const resultado = await crearMascota(datos, tokenActual);
 
     if (resultado.id) {
-      // Si el backend devuelve un id, la mascota se creó correctamente.
-      // Redirigimos a la página de detalle de esa mascota.
       goto(`/mascotas/${resultado.id}`);
     } else if (resultado.detail) {
       error = resultado.detail;
@@ -91,13 +81,12 @@
 
     <div class="campo">
       <label for="especie">Especie <span class="requerido">*</span></label>
-      <input
-        id="especie"
-        type="text"
-        bind:value={especie}
-        placeholder="Perro, gato, conejo..."
-        disabled={cargando}
-      />
+      <select id="especie" bind:value={especie} disabled={cargando}>
+        <option value="">Selecciona una especie</option>
+        {#each ESPECIES as e}
+          <option value={e}>{e}</option>
+        {/each}
+      </select>
     </div>
 
     <div class="campo">
@@ -149,13 +138,12 @@
 
       <div class="campo">
         <label for="provincia">Provincia <span class="requerido">*</span></label>
-        <input
-          id="provincia"
-          type="text"
-          bind:value={provincia}
-          placeholder="Asturias"
-          disabled={cargando}
-        />
+        <select id="provincia" bind:value={provincia} disabled={cargando}>
+          <option value="">Selecciona una provincia</option>
+          {#each PROVINCIAS as p}
+            <option value={p}>{p}</option>
+          {/each}
+        </select>
       </div>
     </div>
 
@@ -243,15 +231,16 @@
     color: #888;
   }
 
-  input, textarea {
+  input, textarea, select {
     padding: 0.6rem 0.8rem;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 1rem;
     font-family: inherit;
+    background: white;
   }
 
-  input:focus, textarea:focus {
+  input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: #555;
   }

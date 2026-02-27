@@ -20,6 +20,7 @@ def listar_mascotas(
     tipo: Optional[str] = None,
     especie: Optional[str] = None,
     provincia: Optional[str] = None,
+    nombre: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(models.Mascota)
@@ -29,6 +30,11 @@ def listar_mascotas(
         query = query.filter(models.Mascota.especie == especie)
     if provincia:
         query = query.filter(models.Mascota.provincia == provincia)
+    # ilike hace la búsqueda sin distinguir mayúsculas/minúsculas.
+    # El % antes y después significa "cualquier cosa antes y después del texto".
+    # Así "lei" encuentra "Leia", "LEI", "pleiades", etc.
+    if nombre:
+        query = query.filter(models.Mascota.nombre.ilike(f"%{nombre}%"))
     return query.all()
 
 @router.get("/{mascota_id}", response_model=schemas.MascotaResponse)
