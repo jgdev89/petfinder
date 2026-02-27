@@ -1,9 +1,12 @@
 <script>
   import { listarMascotas } from '$lib/api.js';
   import { ESPECIES, PROVINCIAS } from '$lib/datos.js';
+  import Mapa from '$lib/Mapa.svelte';
+  import { onMount } from 'svelte';
 
   let mascotas = $state([]);
   let cargando = $state(true);
+  let mostrarMapa = $state(false);
 
   let filtroTipo = $state('');
   let filtroEspecie = $state('');
@@ -23,7 +26,10 @@
     cargando = false;
   }
 
-  cargarMascotas();
+  // onMount garantiza que el fetch solo se hace en el navegador, no en el servidor.
+  onMount(() => {
+    cargarMascotas();
+  });
 </script>
 
 <main>
@@ -69,6 +75,10 @@
       }}>
         Limpiar
       </button>
+
+      <button class="btn-mapa" onclick={() => mostrarMapa = !mostrarMapa}>
+        {mostrarMapa ? 'Ocultar mapa' : 'Ver en mapa'}
+      </button>
     </div>
   </div>
 
@@ -77,6 +87,10 @@
   {:else if mascotas.length === 0}
     <p>No hay mascotas que coincidan con los filtros.</p>
   {:else}
+    {#if mostrarMapa}
+      <Mapa {mascotas} />
+    {/if}
+
     <div class="listado">
       {#each mascotas as mascota}
         <div class="tarjeta">
@@ -147,6 +161,16 @@
 
   .filtros-secundarios button:hover {
     background: #f5f5f5;
+  }
+
+  .btn-mapa {
+    background: #333 !important;
+    color: white !important;
+    border-color: #333 !important;
+  }
+
+  .btn-mapa:hover {
+    background: #555 !important;
   }
 
   .listado {
