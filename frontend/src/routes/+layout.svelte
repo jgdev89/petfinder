@@ -34,6 +34,7 @@
     {#if tokenActual}
       <a href="/mascotas/nueva">Publicar</a>
       <a href="/mensajes">Mensajes</a>
+      <a href="/perfil">Mi perfil</a>
       <button onclick={handleCerrarSesion}>Cerrar sesión</button>
     {:else}
       <a href="/login">Entrar</a>

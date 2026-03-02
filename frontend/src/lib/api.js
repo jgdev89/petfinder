@@ -83,3 +83,17 @@ export async function obtenerImagenes(mascotaId) {
   const res = await fetch(`${BASE_URL}/imagenes/mascota/${mascotaId}`);
   return res.json();
 }
+
+export async function miPerfil(token) {
+    const res = await fetch(`${BASE_URL}/usuarios/me/perfil`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
+
+export async function misMascotas(token) {
+    const res = await fetch(`${BASE_URL}/usuarios/me/mascotas`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
