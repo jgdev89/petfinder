@@ -1,5 +1,5 @@
 <script>
-  import { obtenerMascota, enviarMensaje, obtenerImagenes } from "$lib/api.js";
+  import { obtenerMascota, enviarMensaje, obtenerImagenes, eliminarMascota, resolverMascota, obtenerMiPerfil } from "$lib/api.js";
   import { token } from "$lib/auth.js";
   import { page } from "$app/state";
   import { get } from "svelte/store";
@@ -9,11 +9,10 @@
   let mascota = $state(null);
   let cargando = $state(true);
   let error = $state(false);
+  let usuarioActualId = $state(null);
+  let esDueno = $state(false);
 
-  // Controla si el formulario de mensaje está visible o no.
   let mostrarFormulario = $state(false);
-
-  // Campos del formulario de mensaje.
   let asunto = $state("");
   let contenido = $state("");
   let enviando = $state(false);
@@ -24,6 +23,13 @@
     try {
       mascota = await obtenerMascota(page.params.id);
       imagenes = await obtenerImagenes(page.params.id);
+
+      const tokenActual = get(token);
+      if (tokenActual) {
+        const perfil = await obtenerMiPerfil(tokenActual);
+        usuarioActualId = perfil.id;
+        esDueno = perfil.id === mascota.usuario_id;
+      }
     } catch (e) {
       error = true;
     } finally {
@@ -66,6 +72,20 @@
     enviando = false;
   }
 
+  async function handleEliminar() {
+    if (!confirm("¿Seguro que quieres eliminar esta publicación?")) return;
+    const tokenActual = get(token);
+    await eliminarMascota(mascota.id, tokenActual);
+    goto("/perfil");
+  }
+
+  async function handleResolver() {
+    if (!confirm("¿Marcar este caso como resuelto?")) return;
+    const tokenActual = get(token);
+    await resolverMascota(mascota.id, tokenActual);
+    mascota = { ...mascota, estado: "resuelto" };
+  }
+
   cargar();
 </script>
 
@@ -103,10 +123,7 @@
       <p><strong>Especie:</strong> {mascota.especie}</p>
       {#if mascota.raza}<p><strong>Raza:</strong> {mascota.raza}</p>{/if}
       {#if mascota.color}<p><strong>Color:</strong> {mascota.color}</p>{/if}
-      <p>
-        <strong>Ubicación:</strong>
-        {mascota.localidad}, {mascota.provincia}
-      </p>
+      <p><strong>Ubicación:</strong> {mascota.localidad}, {mascota.provincia}</p>
       <p><strong>Fecha:</strong> {mascota.fecha_suceso}</p>
       <p><strong>Estado:</strong> {mascota.estado}</p>
     </div>
@@ -118,12 +135,26 @@
       </div>
     {/if}
 
+    {#if esDueno}
+      <div class="acciones-dueno">
+        <h2>Gestionar publicación</h2>
+        <div class="botones-dueno">
+          <a href="/mascotas/{mascota.id}/editar" class="btn-editar">Editar</a>
+          {#if mascota.estado === "activo"}
+            <button onclick={handleResolver} class="btn-resolver">
+              Marcar como resuelto
+            </button>
+          {/if}
+          <button onclick={handleEliminar} class="btn-eliminar">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    {/if}
+
     <div class="contacto">
       <h2>¿Tienes información?</h2>
-      <p>
-        Si has visto a esta mascota o tienes alguna información, contacta con
-        quien publicó este caso.
-      </p>
+      <p>Si has visto a esta mascota o tienes alguna información, contacta con quien publicó este caso.</p>
 
       {#if mensajeEnviado}
         <p class="exito">✓ Mensaje enviado correctamente.</p>
@@ -132,50 +163,25 @@
           {#if errorMensaje}
             <p class="error">{errorMensaje}</p>
           {/if}
-
           <div class="campo">
             <label for="asunto">Asunto</label>
-            <input
-              id="asunto"
-              type="text"
-              bind:value={asunto}
-              placeholder="Ej: He visto a tu perro"
-              disabled={enviando}
-            />
+            <input id="asunto" type="text" bind:value={asunto} placeholder="Ej: He visto a tu perro" disabled={enviando} />
           </div>
-
           <div class="campo">
             <label for="contenido">Mensaje</label>
-            <textarea
-              id="contenido"
-              bind:value={contenido}
-              placeholder="Escribe aquí tu mensaje..."
-              rows="4"
-              disabled={enviando}
-            ></textarea>
+            <textarea id="contenido" bind:value={contenido} placeholder="Escribe aquí tu mensaje..." rows="4" disabled={enviando}></textarea>
           </div>
-
           <div class="botones">
-            <button
-              class="btn-enviar"
-              onclick={handleEnviar}
-              disabled={enviando}
-            >
+            <button class="btn-enviar" onclick={handleEnviar} disabled={enviando}>
               {enviando ? "Enviando..." : "Enviar mensaje"}
             </button>
-            <button
-              class="btn-cancelar"
-              onclick={() => (mostrarFormulario = false)}
-              disabled={enviando}
-            >
+            <button class="btn-cancelar" onclick={() => (mostrarFormulario = false)} disabled={enviando}>
               Cancelar
             </button>
           </div>
         </div>
       {:else}
-        <button class="btn-contactar" onclick={abrirFormulario}>
-          Contactar
-        </button>
+        <button class="btn-contactar" onclick={abrirFormulario}>Contactar</button>
       {/if}
     </div>
   </main>
@@ -195,9 +201,7 @@
     text-decoration: none;
   }
 
-  .volver:hover {
-    color: #000;
-  }
+  .volver:hover { color: #000; }
 
   .cabecera {
     display: flex;
@@ -206,9 +210,7 @@
     margin-bottom: 1.5rem;
   }
 
-  h1 {
-    margin: 0;
-  }
+  h1 { margin: 0; }
 
   .tipo {
     font-size: 0.8rem;
@@ -218,14 +220,8 @@
     white-space: nowrap;
   }
 
-  .perdida {
-    background: #ffe0e0;
-    color: #c00;
-  }
-  .encontrada {
-    background: #e0ffe0;
-    color: #060;
-  }
+  .perdida { background: #ffe0e0; color: #c00; }
+  .encontrada { background: #e0ffe0; color: #060; }
 
   .info {
     background: #f5f5f5;
@@ -237,14 +233,57 @@
     margin-bottom: 1.5rem;
   }
 
-  .descripcion {
-    margin-bottom: 1.5rem;
+  .descripcion { margin-bottom: 1.5rem; }
+  .descripcion h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+
+  .acciones-dueno {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  .descripcion h2 {
+  .acciones-dueno h2 {
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
+
+  .botones-dueno {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-editar {
+    padding: 0.5rem 1rem;
+    background: #333;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .btn-resolver {
+    padding: 0.5rem 1rem;
+    background: #060;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .btn-eliminar {
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #c00;
+    border: 1px solid #c00;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .btn-eliminar:hover { background: #ffe0e0; }
 
   .contacto {
     border: 1px solid #ddd;
@@ -253,15 +292,8 @@
     margin-top: 2rem;
   }
 
-  .contacto h2 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .contacto > p {
-    color: #555;
-    margin-bottom: 1rem;
-  }
+  .contacto h2 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .contacto > p { color: #555; margin-bottom: 1rem; }
 
   .btn-contactar {
     background: #333;
@@ -280,20 +312,11 @@
     margin-top: 1rem;
   }
 
-  .campo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
+  .campo { display: flex; flex-direction: column; gap: 0.3rem; }
 
-  label {
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #333;
-  }
+  label { font-size: 0.9rem; font-weight: bold; color: #333; }
 
-  input,
-  textarea {
+  input, textarea {
     padding: 0.6rem 0.8rem;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -301,16 +324,9 @@
     font-family: inherit;
   }
 
-  input:focus,
-  textarea:focus {
-    outline: none;
-    border-color: #555;
-  }
+  input:focus, textarea:focus { outline: none; border-color: #555; }
 
-  .botones {
-    display: flex;
-    gap: 0.8rem;
-  }
+  .botones { display: flex; gap: 0.8rem; }
 
   .btn-enviar {
     background: #333;
@@ -322,10 +338,7 @@
     font-size: 1rem;
   }
 
-  .btn-enviar:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-  }
+  .btn-enviar:disabled { background: #aaa; cursor: not-allowed; }
 
   .btn-cancelar {
     background: white;

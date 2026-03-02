@@ -97,3 +97,46 @@ export async function misMascotas(token) {
     });
     return res.json();
 }
+
+export async function eliminarMascota(mascotaId, token) {
+    const res = await fetch(`${BASE_URL}/mascotas/${mascotaId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
+
+export async function resolverMascota(mascotaId, token) {
+    const res = await fetch(`${BASE_URL}/mascotas/${mascotaId}/resolver`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
+
+export async function obtenerMiPerfil(token) {
+    const res = await fetch(`${BASE_URL}/usuarios/me/perfil`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
+
+export async function editarMascota(mascotaId, datos, token) {
+    const res = await fetch(`${BASE_URL}/mascotas/${mascotaId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+    });
+    return res.json();
+}
+
+export async function eliminarImagen(imagenId, token) {
+    const res = await fetch(`${BASE_URL}/imagenes/${imagenId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}
