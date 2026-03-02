@@ -1,17 +1,17 @@
 <script>
-  import { listarMascotas } from '$lib/api.js';
-  import { ESPECIES, PROVINCIAS } from '$lib/datos.js';
-  import Mapa from '$lib/Mapa.svelte';
-  import { onMount } from 'svelte';
+  import { listarMascotas } from "$lib/api.js";
+  import { ESPECIES, PROVINCIAS } from "$lib/datos.js";
+  import Mapa from "$lib/Mapa.svelte";
+  import { onMount } from "svelte";
 
   let mascotas = $state([]);
   let cargando = $state(true);
   let mostrarMapa = $state(false);
 
-  let filtroTipo = $state('');
-  let filtroEspecie = $state('');
-  let filtroProvincia = $state('');
-  let filtroNombre = $state('');
+  let filtroTipo = $state("");
+  let filtroEspecie = $state("");
+  let filtroProvincia = $state("");
+  let filtroNombre = $state("");
 
   async function cargarMascotas() {
     cargando = true;
@@ -66,18 +66,20 @@
         {/each}
       </select>
 
-      <button onclick={() => {
-        filtroTipo = '';
-        filtroEspecie = '';
-        filtroProvincia = '';
-        filtroNombre = '';
-        cargarMascotas();
-      }}>
+      <button
+        onclick={() => {
+          filtroTipo = "";
+          filtroEspecie = "";
+          filtroProvincia = "";
+          filtroNombre = "";
+          cargarMascotas();
+        }}
+      >
         Limpiar
       </button>
 
-      <button class="btn-mapa" onclick={() => mostrarMapa = !mostrarMapa}>
-        {mostrarMapa ? 'Ocultar mapa' : 'Ver en mapa'}
+      <button class="btn-mapa" onclick={() => (mostrarMapa = !mostrarMapa)}>
+        {mostrarMapa ? "Ocultar mapa" : "Ver en mapa"}
       </button>
     </div>
   </div>
@@ -94,11 +96,22 @@
     <div class="listado">
       {#each mascotas as mascota}
         <div class="tarjeta">
-          <span class="tipo {mascota.tipo}">{mascota.tipo}</span>
-          <h2>{mascota.nombre ?? 'Sin nombre'}</h2>
-          <p>{mascota.especie} · {mascota.localidad}, {mascota.provincia}</p>
-          <p>{mascota.descripcion}</p>
-          <a href="/mascotas/{mascota.id}">Ver más</a>
+          {#if mascota.imagenes && mascota.imagenes.length > 0}
+            <img
+              src="http://localhost:8000{mascota.imagenes[0].url}"
+              alt={mascota.nombre ?? "Mascota"}
+              class="foto-tarjeta"
+            />
+          {:else}
+            <div class="foto-placeholder">📷</div>
+          {/if}
+          <div class="tarjeta-body">
+            <span class="tipo {mascota.tipo}">{mascota.tipo}</span>
+            <h2>{mascota.nombre ?? "Sin nombre"}</h2>
+            <p>{mascota.especie} · {mascota.localidad}, {mascota.provincia}</p>
+            <p>{mascota.descripcion}</p>
+            <a href="/mascotas/{mascota.id}">Ver más</a>
+          </div>
         </div>
       {/each}
     </div>
@@ -183,6 +196,27 @@
   .tarjeta {
     border: 1px solid #ddd;
     border-radius: 8px;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .foto-tarjeta {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    height: 180px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+  }
+
+  .tarjeta-body {
     padding: 1rem;
   }
 
@@ -193,6 +227,12 @@
     font-weight: bold;
   }
 
-  .perdida { background: #ffe0e0; color: #c00; }
-  .encontrada { background: #e0ffe0; color: #060; }
+  .perdida {
+    background: #ffe0e0;
+    color: #c00;
+  }
+  .encontrada {
+    background: #e0ffe0;
+    color: #060;
+  }
 </style>

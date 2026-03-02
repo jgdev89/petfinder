@@ -23,6 +23,8 @@ services:
       DATABASE_URL: mysql+pymysql://petfinder_user:petfinder_pass@db:3306/petfinder
     depends_on:
       - db
+    volumes:
+    - ./uploads:/app/uploads
 
   frontend:
     build: ./frontend

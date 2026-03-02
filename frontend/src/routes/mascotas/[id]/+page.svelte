@@ -1,10 +1,11 @@
 <script>
-  import { obtenerMascota, enviarMensaje } from '$lib/api.js';
-  import { token } from '$lib/auth.js';
-  import { page } from '$app/state';
-  import { get } from 'svelte/store';
-  import { goto } from '$app/navigation';
+  import { obtenerMascota, enviarMensaje, obtenerImagenes } from "$lib/api.js";
+  import { token } from "$lib/auth.js";
+  import { page } from "$app/state";
+  import { get } from "svelte/store";
+  import { goto } from "$app/navigation";
 
+  let imagenes = $state([]);
   let mascota = $state(null);
   let cargando = $state(true);
   let error = $state(false);
@@ -13,15 +14,16 @@
   let mostrarFormulario = $state(false);
 
   // Campos del formulario de mensaje.
-  let asunto = $state('');
-  let contenido = $state('');
+  let asunto = $state("");
+  let contenido = $state("");
   let enviando = $state(false);
   let mensajeEnviado = $state(false);
-  let errorMensaje = $state('');
+  let errorMensaje = $state("");
 
   async function cargar() {
     try {
       mascota = await obtenerMascota(page.params.id);
+      imagenes = await obtenerImagenes(page.params.id);
     } catch (e) {
       error = true;
     } finally {
@@ -32,7 +34,7 @@
   function abrirFormulario() {
     const tokenActual = get(token);
     if (!tokenActual) {
-      goto('/login');
+      goto("/login");
       return;
     }
     mostrarFormulario = true;
@@ -40,7 +42,7 @@
 
   async function handleEnviar() {
     enviando = true;
-    errorMensaje = '';
+    errorMensaje = "";
 
     const tokenActual = get(token);
     const datos = await enviarMensaje(
@@ -48,9 +50,9 @@
         destinatario_id: mascota.usuario_id,
         mascota_id: mascota.id,
         asunto,
-        contenido
+        contenido,
       },
-      tokenActual
+      tokenActual,
     );
 
     if (datos.id) {
@@ -59,7 +61,7 @@
     } else if (datos.detail) {
       errorMensaje = datos.detail;
     } else {
-      errorMensaje = 'Ha ocurrido un error. Inténtalo de nuevo.';
+      errorMensaje = "Ha ocurrido un error. Inténtalo de nuevo.";
     }
     enviando = false;
   }
@@ -71,27 +73,40 @@
   <main>
     <p>Cargando...</p>
   </main>
-
 {:else if error || !mascota}
   <main>
     <a href="/">← Volver al listado</a>
     <p class="error">No se ha encontrado esta mascota.</p>
   </main>
-
 {:else}
   <main>
     <a href="/" class="volver">← Volver al listado</a>
 
     <div class="cabecera">
       <span class="tipo {mascota.tipo}">{mascota.tipo}</span>
-      <h1>{mascota.nombre ?? 'Sin nombre'}</h1>
+      <h1>{mascota.nombre ?? "Sin nombre"}</h1>
     </div>
+
+    {#if imagenes.length > 0}
+      <div class="galeria">
+        {#each imagenes as img}
+          <img
+            src="http://localhost:8000{img.url}"
+            alt={mascota.nombre ?? "Mascota"}
+            class="foto-detalle"
+          />
+        {/each}
+      </div>
+    {/if}
 
     <div class="info">
       <p><strong>Especie:</strong> {mascota.especie}</p>
       {#if mascota.raza}<p><strong>Raza:</strong> {mascota.raza}</p>{/if}
       {#if mascota.color}<p><strong>Color:</strong> {mascota.color}</p>{/if}
-      <p><strong>Ubicación:</strong> {mascota.localidad}, {mascota.provincia}</p>
+      <p>
+        <strong>Ubicación:</strong>
+        {mascota.localidad}, {mascota.provincia}
+      </p>
       <p><strong>Fecha:</strong> {mascota.fecha_suceso}</p>
       <p><strong>Estado:</strong> {mascota.estado}</p>
     </div>
@@ -105,11 +120,13 @@
 
     <div class="contacto">
       <h2>¿Tienes información?</h2>
-      <p>Si has visto a esta mascota o tienes alguna información, contacta con quien publicó este caso.</p>
+      <p>
+        Si has visto a esta mascota o tienes alguna información, contacta con
+        quien publicó este caso.
+      </p>
 
       {#if mensajeEnviado}
         <p class="exito">✓ Mensaje enviado correctamente.</p>
-
       {:else if mostrarFormulario}
         <div class="formulario-mensaje">
           {#if errorMensaje}
@@ -139,15 +156,22 @@
           </div>
 
           <div class="botones">
-            <button class="btn-enviar" onclick={handleEnviar} disabled={enviando}>
-              {enviando ? 'Enviando...' : 'Enviar mensaje'}
+            <button
+              class="btn-enviar"
+              onclick={handleEnviar}
+              disabled={enviando}
+            >
+              {enviando ? "Enviando..." : "Enviar mensaje"}
             </button>
-            <button class="btn-cancelar" onclick={() => mostrarFormulario = false} disabled={enviando}>
+            <button
+              class="btn-cancelar"
+              onclick={() => (mostrarFormulario = false)}
+              disabled={enviando}
+            >
               Cancelar
             </button>
           </div>
         </div>
-
       {:else}
         <button class="btn-contactar" onclick={abrirFormulario}>
           Contactar
@@ -194,8 +218,14 @@
     white-space: nowrap;
   }
 
-  .perdida { background: #ffe0e0; color: #c00; }
-  .encontrada { background: #e0ffe0; color: #060; }
+  .perdida {
+    background: #ffe0e0;
+    color: #c00;
+  }
+  .encontrada {
+    background: #e0ffe0;
+    color: #060;
+  }
 
   .info {
     background: #f5f5f5;
@@ -319,5 +349,19 @@
     background: #ffe0e0;
     padding: 0.6rem 0.8rem;
     border-radius: 6px;
+  }
+
+  .galeria {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .foto-detalle {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
   }
 </style>

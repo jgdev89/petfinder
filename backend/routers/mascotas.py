@@ -1,6 +1,6 @@
 from auth import get_usuario_actual
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db
 import models, schemas
 from typing import Optional
@@ -35,11 +35,14 @@ def listar_mascotas(
     # Así "lei" encuentra "Leia", "LEI", "pleiades", etc.
     if nombre:
         query = query.filter(models.Mascota.nombre.ilike(f"%{nombre}%"))
-    return query.all()
+    return query.options(joinedload(models.Mascota.imagenes)).all()
 
 @router.get("/{mascota_id}", response_model=schemas.MascotaResponse)
 def obtener_mascota(mascota_id: int, db: Session = Depends(get_db)):
-    mascota = db.query(models.Mascota).filter(models.Mascota.id == mascota_id).first()
+    mascota = db.query(models.Mascota)\
+    .options(joinedload(models.Mascota.imagenes))\
+    .filter(models.Mascota.id == mascota_id)\
+    .first()
     if not mascota:
         raise HTTPException(status_code=404, detail="Mascota no encontrada")
     return mascota

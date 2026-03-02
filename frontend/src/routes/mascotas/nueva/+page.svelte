@@ -1,31 +1,32 @@
 <script>
-  import { crearMascota } from '$lib/api.js';
-  import { token } from '$lib/auth.js';
-  import { ESPECIES, PROVINCIAS } from '$lib/datos.js';
-  import { goto } from '$app/navigation';
-  import { get } from 'svelte/store';
+  import { token } from "$lib/auth.js";
+  import { ESPECIES, PROVINCIAS } from "$lib/datos.js";
+  import { goto } from "$app/navigation";
+  import { get } from "svelte/store";
+  import { crearMascota, subirImagen } from "$lib/api.js";
 
-  let tipo = $state('perdida');
-  let nombre = $state('');
-  let especie = $state('');
-  let localidad = $state('');
-  let provincia = $state('');
-  let fecha_suceso = $state('');
-  let descripcion = $state('');
-  let raza = $state('');
-  let color = $state('');
+  let tipo = $state("perdida");
+  let nombre = $state("");
+  let especie = $state("");
+  let localidad = $state("");
+  let provincia = $state("");
+  let fecha_suceso = $state("");
+  let descripcion = $state("");
+  let raza = $state("");
+  let color = $state("");
+  let imagen = $state(null);
 
   let cargando = $state(false);
-  let error = $state('');
+  let error = $state("");
 
   async function handleSubmit() {
     cargando = true;
-    error = '';
+    error = "";
 
     const tokenActual = get(token);
 
     if (!tokenActual) {
-      goto('/login');
+      goto("/login");
       return;
     }
 
@@ -38,18 +39,22 @@
       fecha_suceso,
       descripcion,
       raza: raza || null,
-      color: color || null
+      color: color || null,
     };
 
     const resultado = await crearMascota(datos, tokenActual);
 
     if (resultado.id) {
+      // Si hay imagen seleccionada, subirla después de crear la mascota
+      if (imagen) {
+        await subirImagen(resultado.id, imagen, tokenActual);
+      }
       goto(`/mascotas/${resultado.id}`);
     } else if (resultado.detail) {
       error = resultado.detail;
       cargando = false;
     } else {
-      error = 'Ha ocurrido un error. Inténtalo de nuevo.';
+      error = "Ha ocurrido un error. Inténtalo de nuevo.";
       cargando = false;
     }
   }
@@ -90,7 +95,8 @@
     </div>
 
     <div class="campo">
-      <label for="nombre">Nombre <span class="opcional">(opcional)</span></label>
+      <label for="nombre">Nombre <span class="opcional">(opcional)</span></label
+      >
       <input
         id="nombre"
         type="text"
@@ -113,7 +119,8 @@
       </div>
 
       <div class="campo">
-        <label for="color">Color <span class="opcional">(opcional)</span></label>
+        <label for="color">Color <span class="opcional">(opcional)</span></label
+        >
         <input
           id="color"
           type="text"
@@ -126,7 +133,8 @@
 
     <div class="fila">
       <div class="campo">
-        <label for="localidad">Localidad <span class="requerido">*</span></label>
+        <label for="localidad">Localidad <span class="requerido">*</span></label
+        >
         <input
           id="localidad"
           type="text"
@@ -137,7 +145,8 @@
       </div>
 
       <div class="campo">
-        <label for="provincia">Provincia <span class="requerido">*</span></label>
+        <label for="provincia">Provincia <span class="requerido">*</span></label
+        >
         <select id="provincia" bind:value={provincia} disabled={cargando}>
           <option value="">Selecciona una provincia</option>
           {#each PROVINCIAS as p}
@@ -148,7 +157,9 @@
     </div>
 
     <div class="campo">
-      <label for="fecha_suceso">Fecha del suceso <span class="requerido">*</span></label>
+      <label for="fecha_suceso"
+        >Fecha del suceso <span class="requerido">*</span></label
+      >
       <input
         id="fecha_suceso"
         type="date"
@@ -158,7 +169,9 @@
     </div>
 
     <div class="campo">
-      <label for="descripcion">Descripción <span class="requerido">*</span></label>
+      <label for="descripcion"
+        >Descripción <span class="requerido">*</span></label
+      >
       <textarea
         id="descripcion"
         bind:value={descripcion}
@@ -168,8 +181,22 @@
       ></textarea>
     </div>
 
+    <div class="campo">
+      <label for="imagen">Foto <span class="opcional">(opcional)</span></label>
+      <input
+        id="imagen"
+        type="file"
+        accept="image/jpeg, image/png, image/webp"
+        onchange={(e) => (imagen = e.target.files[0])}
+        disabled={cargando}
+      />
+      {#if imagen}
+        <p class="preview-nombre">📎 {imagen.name}</p>
+      {/if}
+    </div>
+
     <button onclick={handleSubmit} disabled={cargando}>
-      {cargando ? 'Publicando...' : 'Publicar'}
+      {cargando ? "Publicando..." : "Publicar"}
     </button>
   </form>
 </main>
@@ -231,7 +258,9 @@
     color: #888;
   }
 
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     padding: 0.6rem 0.8rem;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -240,7 +269,9 @@
     background: white;
   }
 
-  input:focus, textarea:focus, select:focus {
+  input:focus,
+  textarea:focus,
+  select:focus {
     outline: none;
     border-color: #555;
   }
@@ -281,5 +312,11 @@
     border-radius: 6px;
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
+  }
+
+  .preview-nombre {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 0.2rem;
   }
 </style>

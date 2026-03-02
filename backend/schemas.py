@@ -34,6 +34,14 @@ class MascotaCreate(BaseModel):
     localidad: str
     fecha_suceso: date
 
+class ImagenResponse(BaseModel):
+    id: int
+    url: str
+    es_principal: bool
+
+    class Config:
+        from_attributes = True    
+
 class MascotaResponse(BaseModel):
     id: int
     usuario_id: int
@@ -48,10 +56,10 @@ class MascotaResponse(BaseModel):
     fecha_suceso: date
     estado: str
     fecha_publicacion: datetime
+    imagenes: list[ImagenResponse] = []
 
     class Config:
         from_attributes = True
-
 
 # --- Mensajes ---
 
