@@ -140,3 +140,11 @@ export async function eliminarImagen(imagenId, token) {
     });
     return res.json();
 }
+
+export async function marcarMensajeLeido(mensajeId, token) {
+    const res = await fetch(`${BASE_URL}/mensajes/${mensajeId}/leido`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return res.json();
+}

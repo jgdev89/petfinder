@@ -1,36 +1,36 @@
 <script>
-  import { obtenerMensajes } from '$lib/api.js';
+  import { obtenerMensajes, marcarMensajeLeido } from '$lib/api.js';
   import { token } from '$lib/auth.js';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
 
   let mensajes = $state([]);
   let cargando = $state(true);
+  let tokenActualGuardado = $state(null);
 
   onMount(() => {
-    // Nos suscribimos al store token.
-    // Cada vez que el token cambie (incluso al recuperarse del localStorage),
-    // esta función se ejecuta con el valor actualizado.
     const unsuscribir = token.subscribe(async (tokenActual) => {
-      if (tokenActual === null) return; // Aún no sabemos si hay sesión, esperamos.
-
+      if (tokenActual === null) return;
       if (tokenActual === undefined) {
         goto('/login');
         return;
       }
-
+      tokenActualGuardado = tokenActual;
       mensajes = await obtenerMensajes(tokenActual);
       cargando = false;
-      unsuscribir(); // Dejamos de escuchar una vez que tenemos los datos.
+      unsuscribir();
     });
 
-    // Si tras 1 segundo el token sigue siendo null, no hay sesión.
     setTimeout(() => {
-      if (cargando) {
-        goto('/login');
-      }
+      if (cargando) goto('/login');
     }, 1000);
   });
+
+  async function marcarLeido(mensaje) {
+    if (mensaje.leido) return;
+    await marcarMensajeLeido(mensaje.id, tokenActualGuardado);
+    mensajes = mensajes.map(m => m.id === mensaje.id ? { ...m, leido: true } : m);
+  }
 
   function formatearFecha(fechaStr) {
     const fecha = new Date(fechaStr);
@@ -47,23 +47,30 @@
 
   {#if cargando}
     <p>Cargando...</p>
-
   {:else if mensajes.length === 0}
     <p class="vacio">No tienes mensajes todavía.</p>
-
   {:else}
     <div class="lista">
       {#each mensajes as mensaje}
-        <div class="mensaje {mensaje.leido ? 'leido' : 'no-leido'}">
+        <div
+          class="mensaje {mensaje.leido ? 'leido' : 'no-leido'}"
+          onclick={() => marcarLeido(mensaje)}
+          role="button"
+          tabindex="0"
+        >
           <div class="cabecera">
             <span class="asunto">{mensaje.asunto}</span>
             <span class="fecha">{formatearFecha(mensaje.fecha_envio)}</span>
           </div>
           <p class="contenido">{mensaje.contenido}</p>
           {#if mensaje.mascota_id}
-            <a href="/mascotas/{mensaje.mascota_id}" class="enlace-mascota">
-              Ver mascota →
-            </a>
+          <a
+            href="/mascotas/{mensaje.mascota_id}"
+            class="enlace-mascota"
+            onclick={(e) => e.stopPropagation()}
+          >
+            Ver mascota →
+          </a>
           {/if}
           {#if !mensaje.leido}
             <span class="badge">Nuevo</span>
@@ -81,13 +88,9 @@
     padding: 2rem;
   }
 
-  h1 {
-    margin-bottom: 1.5rem;
-  }
+  h1 { margin-bottom: 1.5rem; }
 
-  .vacio {
-    color: #888;
-  }
+  .vacio { color: #888; }
 
   .lista {
     display: flex;
@@ -100,16 +103,18 @@
     border-radius: 8px;
     padding: 1.2rem;
     position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
   }
+
+  .mensaje:hover { background: #f9f9f9; }
 
   .no-leido {
     border-left: 3px solid #333;
     background: #fafafa;
   }
 
-  .leido {
-    opacity: 0.7;
-  }
+  .leido { opacity: 0.7; }
 
   .cabecera {
     display: flex;
@@ -118,15 +123,9 @@
     margin-bottom: 0.6rem;
   }
 
-  .asunto {
-    font-weight: bold;
-    font-size: 1rem;
-  }
+  .asunto { font-weight: bold; font-size: 1rem; }
 
-  .fecha {
-    font-size: 0.85rem;
-    color: #888;
-  }
+  .fecha { font-size: 0.85rem; color: #888; }
 
   .contenido {
     color: #444;
@@ -140,9 +139,7 @@
     text-decoration: none;
   }
 
-  .enlace-mascota:hover {
-    color: #000;
-  }
+  .enlace-mascota:hover { color: #000; }
 
   .badge {
     position: absolute;
