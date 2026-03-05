@@ -114,13 +114,6 @@ export async function resolverMascota(mascotaId, token) {
     return res.json();
 }
 
-export async function obtenerMiPerfil(token) {
-    const res = await fetch(`${BASE_URL}/usuarios/me/perfil`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    return res.json();
-}
-
 export async function editarMascota(mascotaId, datos, token) {
     const res = await fetch(`${BASE_URL}/mascotas/${mascotaId}`, {
         method: 'PUT',

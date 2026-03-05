@@ -1,5 +1,5 @@
 <script>
-  import { obtenerMascota, enviarMensaje, obtenerImagenes, eliminarMascota, resolverMascota, obtenerMiPerfil } from "$lib/api.js";
+  import { obtenerMascota, enviarMensaje, obtenerImagenes, eliminarMascota, resolverMascota, miPerfil } from '$lib/api.js';
   import { token } from "$lib/auth.js";
   import { page } from "$app/state";
   import { get } from "svelte/store";
@@ -26,7 +26,7 @@
 
       const tokenActual = get(token);
       if (tokenActual) {
-        const perfil = await obtenerMiPerfil(tokenActual);
+        const perfil = await miPerfil(tokenActual);
         usuarioActualId = perfil.id;
         esDueno = perfil.id === mascota.usuario_id;
       }
