@@ -1,24 +1,25 @@
 <script>
+  import '../app.css';
   import favicon from '$lib/assets/favicon.svg';
   import { recuperarSesion, cerrarSesion, token } from '$lib/auth.js';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
   let { children } = $props();
-
   let tokenActual = $state(null);
+  let menuAbierto = $state(false);
 
   onMount(() => {
     recuperarSesion();
   });
 
-  // Nos suscribimos al store para saber si hay sesión activa
   token.subscribe(valor => {
     tokenActual = valor;
   });
 
   function handleCerrarSesion() {
     cerrarSesion();
+    menuAbierto = false;
     goto('/');
   }
 </script>
@@ -27,71 +28,59 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<nav>
-  <a href="/" class="logo">🐾 PetFinder</a>
+<nav class="sticky top-0 z-50 bg-white border-b border-orange-100 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
-  <div class="enlaces">
-    {#if tokenActual}
-      <a href="/mascotas/nueva">Publicar</a>
-      <a href="/mensajes">Mensajes</a>
-      <a href="/perfil">Mi perfil</a>
-      <button onclick={handleCerrarSesion}>Cerrar sesión</button>
-    {:else}
-      <a href="/login">Entrar</a>
-      <a href="/registro">Registrarse</a>
-    {/if}
+    <a href="/" class="text-xl font-bold text-orange-500 tracking-tight no-underline">
+      🐾 PetFinder
+    </a>
+
+    <!-- Hamburguesa móvil -->
+    <button
+      class="md:hidden flex flex-col gap-1.5 p-1 border-none bg-transparent cursor-pointer"
+      onclick={() => menuAbierto = !menuAbierto}
+      aria-label="Menú"
+    >
+      <span class="block w-6 h-0.5 bg-gray-600 rounded"></span>
+      <span class="block w-6 h-0.5 bg-gray-600 rounded"></span>
+      <span class="block w-6 h-0.5 bg-gray-600 rounded"></span>
+    </button>
+
+    <!-- Enlaces escritorio -->
+    <div class="hidden md:flex items-center gap-6">
+      {#if tokenActual}
+        <a href="/mascotas/nueva" class="text-sm font-medium text-gray-600 hover:text-orange-500 no-underline transition-colors">Publicar</a>
+        <a href="/mensajes" class="text-sm font-medium text-gray-600 hover:text-orange-500 no-underline transition-colors">Mensajes</a>
+        <a href="/perfil" class="text-sm font-medium text-gray-600 hover:text-orange-500 no-underline transition-colors">Mi perfil</a>
+        <button
+          onclick={handleCerrarSesion}
+          class="text-sm text-gray-400 border border-gray-200 rounded-lg px-3 py-1.5 bg-transparent cursor-pointer hover:border-orange-400 hover:text-orange-500 transition-colors"
+        >
+          Cerrar sesión
+        </button>
+      {:else}
+        <a href="/login" class="text-sm font-medium text-gray-600 hover:text-orange-500 no-underline transition-colors">Entrar</a>
+        <a href="/registro" class="text-sm font-medium bg-orange-500 text-white px-4 py-1.5 rounded-full no-underline hover:bg-orange-600 transition-colors">
+          Registrarse
+        </a>
+      {/if}
+    </div>
   </div>
+
+  <!-- Menú móvil desplegable -->
+  {#if menuAbierto}
+    <div class="md:hidden border-t border-orange-100 px-4 py-3 flex flex-col gap-3">
+      {#if tokenActual}
+        <a href="/mascotas/nueva" onclick={() => menuAbierto = false} class="text-gray-700 no-underline font-medium">Publicar</a>
+        <a href="/mensajes" onclick={() => menuAbierto = false} class="text-gray-700 no-underline font-medium">Mensajes</a>
+        <a href="/perfil" onclick={() => menuAbierto = false} class="text-gray-700 no-underline font-medium">Mi perfil</a>
+        <button onclick={handleCerrarSesion} class="text-left text-gray-400 bg-transparent border-none cursor-pointer font-medium p-0">Cerrar sesión</button>
+      {:else}
+        <a href="/login" onclick={() => menuAbierto = false} class="text-gray-700 no-underline font-medium">Entrar</a>
+        <a href="/registro" onclick={() => menuAbierto = false} class="text-gray-700 no-underline font-medium">Registrarse</a>
+      {/if}
+    </div>
+  {/if}
 </nav>
 
 {@render children()}
-
-<style>
-  nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.8rem 2rem;
-    border-bottom: 1px solid #eee;
-    background: white;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-  }
-
-  .enlaces {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-  }
-
-  .enlaces a {
-    text-decoration: none;
-    color: #555;
-    font-size: 0.95rem;
-  }
-
-  .enlaces a:hover {
-    color: #333;
-  }
-
-  .enlaces button {
-    background: none;
-    border: 1px solid #ddd;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    color: #555;
-  }
-
-  .enlaces button:hover {
-    background: #f5f5f5;
-  }
-</style>
