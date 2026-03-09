@@ -15,40 +15,24 @@
   let raza = $state("");
   let color = $state("");
   let imagen = $state(null);
-
   let cargando = $state(false);
   let error = $state("");
 
   async function handleSubmit() {
     cargando = true;
     error = "";
-
     const tokenActual = get(token);
-
-    if (!tokenActual) {
-      goto("/login");
-      return;
-    }
+    if (!tokenActual) { goto("/login"); return; }
 
     const datos = {
-      tipo,
-      nombre: nombre || null,
-      especie,
-      localidad,
-      provincia,
-      fecha_suceso,
-      descripcion,
-      raza: raza || null,
-      color: color || null,
+      tipo, nombre: nombre || null, especie, localidad, provincia,
+      fecha_suceso, descripcion, raza: raza || null, color: color || null,
     };
 
     const resultado = await crearMascota(datos, tokenActual);
 
     if (resultado.id) {
-      // Si hay imagen seleccionada, subirla después de crear la mascota
-      if (imagen) {
-        await subirImagen(resultado.id, imagen, tokenActual);
-      }
+      if (imagen) await subirImagen(resultado.id, imagen, tokenActual);
       goto(`/mascotas/${resultado.id}`);
     } else if (resultado.detail) {
       error = resultado.detail;
@@ -60,33 +44,38 @@
   }
 </script>
 
-<main>
-  <a href="/" class="volver">← Volver al listado</a>
+<main class="max-w-xl mx-auto px-4 py-8">
 
-  <h1>Publicar mascota</h1>
+  <a href="/" class="text-gray-400 hover:text-orange-500 text-sm no-underline transition-colors">← Volver al listado</a>
+
+  <h1 class="text-2xl font-bold text-gray-800 mt-4 mb-6">Publicar mascota</h1>
 
   {#if error}
-    <p class="error">{error}</p>
+    <p class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</p>
   {/if}
 
-  <form>
-    <div class="campo">
-      <label>Tipo</label>
-      <div class="radio-grupo">
-        <label class="radio">
-          <input type="radio" bind:group={tipo} value="perdida" />
+  <div class="flex flex-col gap-5">
+
+    <!-- Tipo -->
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-semibold text-gray-700">Tipo</span>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
+          <input type="radio" bind:group={tipo} value="perdida" class="accent-orange-500" />
           Perdida
         </label>
-        <label class="radio">
-          <input type="radio" bind:group={tipo} value="encontrada" />
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600">
+          <input type="radio" bind:group={tipo} value="encontrada" class="accent-orange-500" />
           Encontrada
         </label>
       </div>
     </div>
 
-    <div class="campo">
-      <label for="especie">Especie <span class="requerido">*</span></label>
-      <select id="especie" bind:value={especie} disabled={cargando}>
+    <!-- Especie -->
+    <div class="flex flex-col gap-1">
+      <label for="especie" class="text-sm font-semibold text-gray-700">Especie <span class="text-red-400 font-normal">*</span></label>
+      <select id="especie" bind:value={especie} disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400 transition-colors">
         <option value="">Selecciona una especie</option>
         {#each ESPECIES as e}
           <option value={e}>{e}</option>
@@ -94,60 +83,38 @@
       </select>
     </div>
 
-    <div class="campo">
-      <label for="nombre">Nombre <span class="opcional">(opcional)</span></label
-      >
-      <input
-        id="nombre"
-        type="text"
-        bind:value={nombre}
-        placeholder="Nombre de la mascota"
-        disabled={cargando}
-      />
+    <!-- Nombre -->
+    <div class="flex flex-col gap-1">
+      <label for="nombre" class="text-sm font-semibold text-gray-700">Nombre <span class="text-gray-400 font-normal">(opcional)</span></label>
+      <input id="nombre" type="text" bind:value={nombre} placeholder="Nombre de la mascota" disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <div class="fila">
-      <div class="campo">
-        <label for="raza">Raza <span class="opcional">(opcional)</span></label>
-        <input
-          id="raza"
-          type="text"
-          bind:value={raza}
-          placeholder="Golden, siamés..."
-          disabled={cargando}
-        />
+    <!-- Raza y Color -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="raza" class="text-sm font-semibold text-gray-700">Raza <span class="text-gray-400 font-normal">(opcional)</span></label>
+        <input id="raza" type="text" bind:value={raza} placeholder="Golden, siamés..." disabled={cargando}
+          class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
       </div>
-
-      <div class="campo">
-        <label for="color">Color <span class="opcional">(opcional)</span></label
-        >
-        <input
-          id="color"
-          type="text"
-          bind:value={color}
-          placeholder="Negro, blanco..."
-          disabled={cargando}
-        />
+      <div class="flex flex-col gap-1">
+        <label for="color" class="text-sm font-semibold text-gray-700">Color <span class="text-gray-400 font-normal">(opcional)</span></label>
+        <input id="color" type="text" bind:value={color} placeholder="Negro, blanco..." disabled={cargando}
+          class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
       </div>
     </div>
 
-    <div class="fila">
-      <div class="campo">
-        <label for="localidad">Localidad <span class="requerido">*</span></label
-        >
-        <input
-          id="localidad"
-          type="text"
-          bind:value={localidad}
-          placeholder="Gijón"
-          disabled={cargando}
-        />
+    <!-- Localidad y Provincia -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="localidad" class="text-sm font-semibold text-gray-700">Localidad <span class="text-red-400 font-normal">*</span></label>
+        <input id="localidad" type="text" bind:value={localidad} placeholder="Gijón" disabled={cargando}
+          class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
       </div>
-
-      <div class="campo">
-        <label for="provincia">Provincia <span class="requerido">*</span></label
-        >
-        <select id="provincia" bind:value={provincia} disabled={cargando}>
+      <div class="flex flex-col gap-1">
+        <label for="provincia" class="text-sm font-semibold text-gray-700">Provincia <span class="text-red-400 font-normal">*</span></label>
+        <select id="provincia" bind:value={provincia} disabled={cargando}
+          class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400 transition-colors">
           <option value="">Selecciona una provincia</option>
           {#each PROVINCIAS as p}
             <option value={p}>{p}</option>
@@ -156,167 +123,38 @@
       </div>
     </div>
 
-    <div class="campo">
-      <label for="fecha_suceso"
-        >Fecha del suceso <span class="requerido">*</span></label
-      >
-      <input
-        id="fecha_suceso"
-        type="date"
-        bind:value={fecha_suceso}
-        disabled={cargando}
-      />
+    <!-- Fecha -->
+    <div class="flex flex-col gap-1">
+      <label for="fecha_suceso" class="text-sm font-semibold text-gray-700">Fecha del suceso <span class="text-red-400 font-normal">*</span></label>
+      <input id="fecha_suceso" type="date" bind:value={fecha_suceso} disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <div class="campo">
-      <label for="descripcion"
-        >Descripción <span class="requerido">*</span></label
-      >
-      <textarea
-        id="descripcion"
-        bind:value={descripcion}
+    <!-- Descripción -->
+    <div class="flex flex-col gap-1">
+      <label for="descripcion" class="text-sm font-semibold text-gray-700">Descripción <span class="text-red-400 font-normal">*</span></label>
+      <textarea id="descripcion" bind:value={descripcion} rows="4" disabled={cargando}
         placeholder="Describe la mascota, dónde se perdió, señas particulares..."
-        rows="4"
-        disabled={cargando}
-      ></textarea>
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors resize-none"></textarea>
     </div>
 
-    <div class="campo">
-      <label for="imagen">Foto <span class="opcional">(opcional)</span></label>
-      <input
-        id="imagen"
-        type="file"
-        accept="image/jpeg, image/png, image/webp"
-        onchange={(e) => (imagen = e.target.files[0])}
-        disabled={cargando}
-      />
+    <!-- Foto -->
+    <div class="flex flex-col gap-1">
+      <label for="imagen" class="text-sm font-semibold text-gray-700">Foto <span class="text-gray-400 font-normal">(opcional)</span></label>
+      <input id="imagen" type="file" accept="image/jpeg, image/png, image/webp"
+        onchange={(e) => (imagen = e.target.files[0])} disabled={cargando}
+        class="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 cursor-pointer" />
       {#if imagen}
-        <p class="preview-nombre">📎 {imagen.name}</p>
+        <p class="text-xs text-gray-400 mt-1">📎 {imagen.name}</p>
       {/if}
     </div>
 
-    <button onclick={handleSubmit} disabled={cargando}>
+    <!-- Botón -->
+    <button onclick={handleSubmit} disabled={cargando}
+      class="w-full py-2.5 bg-orange-500 text-white font-medium rounded-lg border-none cursor-pointer hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2">
       {cargando ? "Publicando..." : "Publicar"}
     </button>
-  </form>
+
+  </div>
+
 </main>
-
-<style>
-  main {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .volver {
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    color: #555;
-    text-decoration: none;
-  }
-
-  .volver:hover {
-    color: #000;
-  }
-
-  h1 {
-    margin-bottom: 1.5rem;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-
-  .campo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    flex: 1;
-  }
-
-  .fila {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  label {
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .requerido {
-    color: #c00;
-    font-weight: normal;
-  }
-
-  .opcional {
-    font-weight: normal;
-    color: #888;
-  }
-
-  input,
-  textarea,
-  select {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-family: inherit;
-    background: white;
-  }
-
-  input:focus,
-  textarea:focus,
-  select:focus {
-    outline: none;
-    border-color: #555;
-  }
-
-  .radio-grupo {
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  .radio {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-weight: normal;
-    cursor: pointer;
-  }
-
-  button {
-    padding: 0.7rem;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-  }
-
-  button:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-  }
-
-  .error {
-    background: #ffe0e0;
-    color: #c00;
-    padding: 0.6rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .preview-nombre {
-    font-size: 0.85rem;
-    color: #555;
-    margin-top: 0.2rem;
-  }
-</style>
