@@ -6,23 +6,16 @@
   let email = $state('');
   let password = $state('');
   let telefono = $state('');
-
   let cargando = $state(false);
   let error = $state('');
 
   async function handleSubmit() {
     cargando = true;
     error = '';
-
     const datos = await registrar(nombre, email, password, telefono);
-
     if (datos.id) {
-      // Si el backend devuelve un id, el usuario se creó correctamente.
-      // Redirigimos al login para que inicie sesión con sus nuevas credenciales.
       goto('/login');
     } else if (datos.detail) {
-      // FastAPI devuelve los errores en el campo "detail".
-      // Por ejemplo: "El email ya está registrado".
       error = datos.detail;
       cargando = false;
     } else {
@@ -32,145 +25,51 @@
   }
 </script>
 
-<main>
-  <div class="formulario">
-    <h1>Crear cuenta</h1>
+<main class="min-h-screen flex items-center justify-center px-4 bg-gray-50">
+  <div class="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col gap-5">
+
+    <div class="text-center mb-2">
+      <p class="text-3xl mb-2">🐾</p>
+      <h1 class="text-2xl font-bold text-gray-800">Crear cuenta</h1>
+      <p class="text-sm text-gray-400 mt-1">Únete a PetFinder</p>
+    </div>
 
     {#if error}
-      <p class="error">{error}</p>
+      <p class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg">{error}</p>
     {/if}
 
-    <div class="campo">
-      <label for="nombre">Nombre</label>
-      <input
-        id="nombre"
-        type="text"
-        bind:value={nombre}
-        placeholder="Tu nombre"
-        disabled={cargando}
-      />
+    <div class="flex flex-col gap-1">
+      <label for="nombre" class="text-sm font-semibold text-gray-700">Nombre</label>
+      <input id="nombre" type="text" bind:value={nombre} placeholder="Tu nombre" disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <div class="campo">
-      <label for="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        bind:value={email}
-        placeholder="tu@email.com"
-        disabled={cargando}
-      />
+    <div class="flex flex-col gap-1">
+      <label for="email" class="text-sm font-semibold text-gray-700">Email</label>
+      <input id="email" type="email" bind:value={email} placeholder="tu@email.com" disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <div class="campo">
-      <label for="password">Contraseña</label>
-      <input
-        id="password"
-        type="password"
-        bind:value={password}
-        placeholder="Elige una contraseña"
-        disabled={cargando}
-      />
+    <div class="flex flex-col gap-1">
+      <label for="password" class="text-sm font-semibold text-gray-700">Contraseña</label>
+      <input id="password" type="password" bind:value={password} placeholder="Elige una contraseña" disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <div class="campo">
-      <label for="telefono">Teléfono <span class="opcional">(opcional)</span></label>
-      <input
-        id="telefono"
-        type="tel"
-        bind:value={telefono}
-        placeholder="612345678"
-        disabled={cargando}
-      />
+    <div class="flex flex-col gap-1">
+      <label for="telefono" class="text-sm font-semibold text-gray-700">Teléfono <span class="text-gray-400 font-normal">(opcional)</span></label>
+      <input id="telefono" type="tel" bind:value={telefono} placeholder="612345678" disabled={cargando}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-orange-400 transition-colors" />
     </div>
 
-    <button onclick={handleSubmit} disabled={cargando}>
+    <button onclick={handleSubmit} disabled={cargando}
+      class="w-full py-2.5 bg-orange-500 text-white font-medium rounded-lg border-none cursor-pointer hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-1">
       {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
     </button>
 
-    <p class="login">
-      ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+    <p class="text-center text-sm text-gray-400">
+      ¿Ya tienes cuenta? <a href="/login" class="text-orange-500 font-medium hover:text-orange-600 no-underline">Inicia sesión</a>
     </p>
+
   </div>
 </main>
-
-<style>
-  main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-  }
-
-  .formulario {
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  h1 {
-    margin-bottom: 0.5rem;
-  }
-
-  .campo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  label {
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .opcional {
-    font-weight: normal;
-    color: #888;
-  }
-
-  input {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: #555;
-  }
-
-  button {
-    padding: 0.7rem;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-  }
-
-  button:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-  }
-
-  .error {
-    background: #ffe0e0;
-    color: #c00;
-    padding: 0.6rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-  }
-
-  .login {
-    text-align: center;
-    font-size: 0.9rem;
-    color: #555;
-  }
-</style>
