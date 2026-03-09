@@ -15,51 +15,65 @@
 
   async function cargarMascotas() {
     cargando = true;
-
     const filtros = {};
     if (filtroTipo) filtros.tipo = filtroTipo;
     if (filtroEspecie) filtros.especie = filtroEspecie;
     if (filtroProvincia) filtros.provincia = filtroProvincia;
     if (filtroNombre) filtros.nombre = filtroNombre;
-
     mascotas = await listarMascotas(filtros);
     cargando = false;
   }
 
-  // onMount garantiza que el fetch solo se hace en el navegador, no en el servidor.
   onMount(() => {
     cargarMascotas();
   });
 </script>
 
-<main>
-  <h1>PetFinder</h1>
-  <p>Mascotas perdidas y encontradas en España</p>
+<main class="max-w-5xl mx-auto px-4 py-8">
 
-  <div class="filtros">
+  <!-- Hero -->
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Encuentra a tu mascota</h1>
+    <p class="text-gray-500">Casos de mascotas perdidas y encontradas en España</p>
+  </div>
+
+  <!-- Buscador -->
+  <div class="flex flex-col gap-3 mb-6">
     <input
       type="text"
       bind:value={filtroNombre}
-      placeholder="Buscar por nombre..."
+      placeholder="🔍 Buscar por nombre..."
       oninput={cargarMascotas}
-      class="buscador"
+      class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 transition-colors"
     />
 
-    <div class="filtros-secundarios">
-      <select bind:value={filtroTipo} onchange={cargarMascotas}>
+    <div class="flex flex-wrap gap-2">
+      <select
+        bind:value={filtroTipo}
+        onchange={cargarMascotas}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400"
+      >
         <option value="">Todos los tipos</option>
         <option value="perdida">Perdida</option>
         <option value="encontrada">Encontrada</option>
       </select>
 
-      <select bind:value={filtroEspecie} onchange={cargarMascotas}>
+      <select
+        bind:value={filtroEspecie}
+        onchange={cargarMascotas}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400"
+      >
         <option value="">Todas las especies</option>
         {#each ESPECIES as especie}
           <option value={especie}>{especie}</option>
         {/each}
       </select>
 
-      <select bind:value={filtroProvincia} onchange={cargarMascotas}>
+      <select
+        bind:value={filtroProvincia}
+        onchange={cargarMascotas}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400"
+      >
         <option value="">Todas las provincias</option>
         {#each PROVINCIAS as provincia}
           <option value={provincia}>{provincia}</option>
@@ -74,165 +88,67 @@
           filtroNombre = "";
           cargarMascotas();
         }}
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
       >
         Limpiar
       </button>
 
-      <button class="btn-mapa" onclick={() => (mostrarMapa = !mostrarMapa)}>
-        {mostrarMapa ? "Ocultar mapa" : "Ver en mapa"}
+      <button
+        class="px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors {mostrarMapa ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}"
+        onclick={() => (mostrarMapa = !mostrarMapa)}
+      >
+        {mostrarMapa ? "Ocultar mapa" : "🗺️ Ver en mapa"}
       </button>
     </div>
   </div>
 
-  {#if cargando}
-    <p>Cargando...</p>
-  {:else if mascotas.length === 0}
-    <p>No hay mascotas que coincidan con los filtros.</p>
-  {:else}
-    {#if mostrarMapa}
+  {#if mostrarMapa}
+    <div class="mb-6 rounded-xl overflow-hidden">
       <Mapa {mascotas} />
-    {/if}
+    </div>
+  {/if}
 
-    <div class="listado">
+  {#if cargando}
+    <div class="text-center py-16 text-gray-400">Cargando...</div>
+  {:else if mascotas.length === 0}
+    <div class="text-center py-16 text-gray-400">
+      <p class="text-4xl mb-3">🐾</p>
+      <p>No hay mascotas que coincidan con los filtros.</p>
+    </div>
+  {:else}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {#each mascotas as mascota}
-        <div class="tarjeta">
-          {#if mascota.imagenes && mascota.imagenes.length > 0}
-            <img
-              src="http://localhost:8000{mascota.imagenes[0].url}"
-              alt={mascota.nombre ?? "Mascota"}
-              class="foto-tarjeta"
-            />
-          {:else}
-            <div class="foto-placeholder">📷</div>
-          {/if}
-          <div class="tarjeta-body">
-            <span class="tipo {mascota.tipo}">{mascota.tipo}</span>
-            <h2>{mascota.nombre ?? "Sin nombre"}</h2>
-            <p>{mascota.especie} · {mascota.localidad}, {mascota.provincia}</p>
-            <p>{mascota.descripcion}</p>
-            <a href="/mascotas/{mascota.id}">Ver más</a>
+        <a href="/mascotas/{mascota.id}" class="no-underline">
+          <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+
+            {#if mascota.imagenes && mascota.imagenes.length > 0}
+              <img
+                src="http://localhost:8000{mascota.imagenes[0].url}"
+                alt={mascota.nombre ?? "Mascota"}
+                class="w-full h-48 object-cover"
+              />
+            {:else}
+              <div class="w-full h-48 bg-orange-50 flex items-center justify-center text-4xl">
+                🐾
+              </div>
+            {/if}
+
+            <div class="p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full {mascota.tipo === 'perdida' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+                  {mascota.tipo}
+                </span>
+                <span class="text-xs text-gray-400">{mascota.especie}</span>
+              </div>
+              <h2 class="font-semibold text-gray-800 text-base mb-1">{mascota.nombre ?? "Sin nombre"}</h2>
+              <p class="text-xs text-gray-400 mb-2">📍 {mascota.localidad}, {mascota.provincia}</p>
+              <p class="text-sm text-gray-500 line-clamp-2">{mascota.descripcion ?? ""}</p>
+            </div>
+
           </div>
-        </div>
+        </a>
       {/each}
     </div>
   {/if}
+
 </main>
-
-<style>
-  main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .filtros {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    margin-top: 1.5rem;
-  }
-
-  .buscador {
-    padding: 0.6rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-family: inherit;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .buscador:focus {
-    outline: none;
-    border-color: #555;
-  }
-
-  .filtros-secundarios {
-    display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-  }
-
-  .filtros-secundarios select {
-    padding: 0.5rem 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    background: white;
-  }
-
-  .filtros-secundarios button {
-    padding: 0.5rem 1rem;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    color: #555;
-  }
-
-  .filtros-secundarios button:hover {
-    background: #f5f5f5;
-  }
-
-  .btn-mapa {
-    background: #333 !important;
-    color: white !important;
-    border-color: #333 !important;
-  }
-
-  .btn-mapa:hover {
-    background: #555 !important;
-  }
-
-  .listado {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  .tarjeta {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 0;
-  }
-
-  .foto-tarjeta {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-  }
-
-  .foto-placeholder {
-    width: 100%;
-    height: 180px;
-    background: #f0f0f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-  }
-
-  .tarjeta-body {
-    padding: 1rem;
-  }
-
-  .tipo {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-weight: bold;
-  }
-
-  .perdida {
-    background: #ffe0e0;
-    color: #c00;
-  }
-  .encontrada {
-    background: #e0ffe0;
-    color: #060;
-  }
-</style>
