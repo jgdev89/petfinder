@@ -33,23 +33,20 @@
 </script>
 
 <main class="max-w-2xl mx-auto px-4 py-8">
-
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">Mensajes recibidos</h1>
+  <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Mensajes recibidos</h1>
 
   {#if cargando}
-    <p class="text-gray-400">Cargando...</p>
-
+    <p class="text-gray-400 dark:text-gray-500">Cargando...</p>
   {:else if mensajes.length === 0}
-    <div class="text-center py-12 text-gray-400">
+    <div class="text-center py-12 text-gray-400 dark:text-gray-500">
       <p class="text-4xl mb-3">✉️</p>
       <p>No tienes mensajes todavía.</p>
     </div>
-
   {:else}
     <div class="flex flex-col gap-3">
       {#each mensajes as mensaje}
         <div
-          class="relative border rounded-xl p-4 cursor-pointer transition-all {mensaje.leido ? 'border-gray-100 opacity-60 hover:opacity-80' : 'border-l-4 border-l-orange-400 border-gray-100 bg-orange-50 hover:bg-orange-100'}"
+          class="relative border rounded-xl p-4 cursor-pointer transition-all {mensaje.leido ? 'border-gray-100 dark:border-gray-700 opacity-60 hover:opacity-80' : 'border-l-4 border-l-orange-400 border-gray-100 dark:border-gray-700 bg-orange-50 dark:bg-orange-950 hover:bg-orange-100 dark:hover:bg-orange-900'}"
           onclick={() => marcarLeido(mensaje)}
           role="button"
           tabindex="0"
@@ -61,15 +58,14 @@
           {/if}
 
           <div class="flex justify-between items-start mb-2 pr-16">
-            <span class="font-semibold text-gray-800 text-sm">{mensaje.asunto}</span>
-            <span class="text-xs text-gray-400 whitespace-nowrap ml-3">{formatearFecha(mensaje.fecha_envio)}</span>
+            <span class="font-semibold text-gray-800 dark:text-gray-100 text-sm">{mensaje.asunto}</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap ml-3">{formatearFecha(mensaje.fecha_envio)}</span>
           </div>
 
-          <p class="text-sm text-gray-600 leading-relaxed mb-3">{mensaje.contenido}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">{mensaje.contenido}</p>
 
           {#if mensaje.mascota_id}
-            
-              <a href="/mascotas/{mensaje.mascota_id}"
+            <a href="/mascotas/{mensaje.mascota_id}"
               class="text-xs text-orange-500 hover:text-orange-600 no-underline font-medium transition-colors"
               onclick={(e) => e.stopPropagation()}
             >
@@ -80,5 +76,4 @@
       {/each}
     </div>
   {/if}
-
 </main>
