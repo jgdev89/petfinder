@@ -12,7 +12,6 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-
   backend:
     build: ./backend
     container_name: petfinder_backend
@@ -21,11 +20,13 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: mysql+pymysql://petfinder_user:petfinder_pass@db:3306/petfinder
+      SENDGRID_API_KEY: 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
+      EMAIL_REMITENTE: jgdev89@gmail.com
+      FRONTEND_URL: http://localhost:5173
     depends_on:
       - db
     volumes:
-    - ./uploads:/app/uploads
-
+      - ./uploads:/app/uploads
   frontend:
     build: ./frontend
     container_name: petfinder_frontend
@@ -34,6 +35,5 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-
 volumes:
   db_data:

@@ -60,3 +60,11 @@ class Mensaje(Base):
     contenido = Column(Text, nullable=False)
     leido = Column(Boolean, default=False)
     fecha_envio = Column(DateTime, default=func.now())
+
+class TokenReseteo(Base):
+    __tablename__ = "tokens_reseteo"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    token = Column(String(255), unique=True, nullable=False)
+    expira = Column(DateTime, nullable=False)
+    usado = Column(Boolean, default=False)
