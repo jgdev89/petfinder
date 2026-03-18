@@ -1,34 +1,53 @@
 <script>
+  // Importamos los estilos globales de Tailwind
   import "../app.css";
+  // Importamos el favicon (icono de la pestaña del navegador)
   import favicon from "$lib/assets/favicon.svg";
+  // Importamos las funciones de autenticación y el store del token
   import { recuperarSesion, cerrarSesion, token } from "$lib/auth.js";
+  // onMount ejecuta código cuando el componente se monta en el navegador
   import { onMount } from "svelte";
+  // goto permite navegar a otra ruta programáticamente
   import { goto } from "$app/navigation";
 
+  // $props() recibe las props del componente. "children" es el contenido
+  // de las páginas hijas que se renderizará dentro de este layout
   let { children } = $props();
+
+  // Estado reactivo del token actual (null = no logueado)
   let tokenActual = $state(null);
+  // Controla si el menú hamburguesa está abierto en móvil
   let menuAbierto = $state(false);
+  // Controla si el modo oscuro está activo
   let modoOscuro = $state(false);
 
   onMount(() => {
+    // Recuperamos la sesión guardada en localStorage al cargar la app
     recuperarSesion();
+
+    // Comprobamos si el usuario tenía el modo oscuro activado
     const guardado = localStorage.getItem("tema");
     if (guardado === "oscuro") {
       modoOscuro = true;
+      // Añadimos la clase "dark" al <html> para activar el modo oscuro de Tailwind
       document.documentElement.classList.add("dark");
     }
   });
 
+  // Nos suscribimos al store del token para saber si hay sesión activa.
+  // Cada vez que el token cambie, tokenActual se actualiza automáticamente.
   token.subscribe((valor) => {
     tokenActual = valor;
   });
 
+  // Cierra la sesión, cierra el menú móvil y redirige al inicio
   function handleCerrarSesion() {
     cerrarSesion();
     menuAbierto = false;
     goto("/");
   }
 
+  // Alterna entre modo oscuro y claro, y guarda la preferencia en localStorage
   function toggleTema() {
     modoOscuro = !modoOscuro;
     if (modoOscuro) {
@@ -41,14 +60,17 @@
   }
 </script>
 
+<!-- svelte:head permite modificar el <head> del HTML desde cualquier componente -->
 <svelte:head>
   <link rel="icon" href={favicon} />
 </svelte:head>
 
+<!-- Barra de navegación fija en la parte superior (sticky) -->
 <nav
   class="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-orange-100 dark:border-gray-700 shadow-sm"
 >
   <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <!-- Logo que lleva al inicio -->
     <a
       href="/"
       class="text-xl font-bold text-orange-500 tracking-tight no-underline"
@@ -56,7 +78,8 @@
       🐾 PetFinder
     </a>
 
-    <!-- Hamburguesa móvil -->
+    <!-- Botón hamburguesa: solo visible en móvil (md:hidden).
+         Al pulsarlo abre o cierra el menú móvil -->
     <button
       class="md:hidden flex flex-col gap-1.5 p-1 border-none bg-transparent cursor-pointer"
       onclick={() => (menuAbierto = !menuAbierto)}
@@ -67,8 +90,9 @@
       <span class="block w-6 h-0.5 bg-gray-600 dark:bg-gray-300 rounded"></span>
     </button>
 
-    <!-- Enlaces escritorio -->
+    <!-- Enlaces de escritorio: ocultos en móvil (hidden), visibles en md en adelante -->
     <div class="hidden md:flex items-center gap-6">
+      <!-- Mostramos enlaces distintos según si hay sesión activa o no -->
       {#if tokenActual}
         <a
           href="/mascotas/nueva"
@@ -91,6 +115,7 @@
         >
           Cerrar sesión
         </button>
+        <!-- Botón de toggle de tema: muestra sol si está en oscuro, luna si está en claro -->
         <button
           onclick={toggleTema}
           aria-label="Cambiar tema"
@@ -104,6 +129,7 @@
           class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-orange-500 no-underline transition-colors"
           >Entrar</a
         >
+        <!-- Botón de registro con fondo naranja -->
         <a
           href="/registro"
           class="text-sm font-medium bg-orange-500 text-white px-4 py-1.5 rounded-full no-underline hover:bg-orange-600 transition-colors"
@@ -120,7 +146,7 @@
     </div>
   </div>
 
-  <!-- Menú móvil desplegable -->
+  <!-- Menú móvil desplegable: solo visible cuando menuAbierto es true -->
   {#if menuAbierto}
     <div
       class="md:hidden border-t border-orange-100 dark:border-gray-700 px-4 py-3 flex flex-col gap-3"
@@ -163,6 +189,7 @@
           >Registrarse</a
         >
       {/if}
+      <!-- Botón de tema en el menú móvil: muestra texto en vez de emoji -->
       <button
         onclick={toggleTema}
         aria-label="Cambiar tema"
@@ -174,4 +201,6 @@
   {/if}
 </nav>
 
+<!-- {@render children()} renderiza el contenido de la página actual
+     dentro de este layout. Es como un "slot" en versiones anteriores de Svelte -->
 {@render children()}
