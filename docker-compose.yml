@@ -19,9 +19,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: mysql+pymysql://petfinder_user:petfinder_pass@db:3306/petfinder
-      SENDGRID_API_KEY: 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
-      EMAIL_REMITENTE: jgdev89@gmail.com
+      SENDGRID_API_KEY: TU_API_KEY_AQUI
+      EMAIL_REMITENTE: TU_EMAIL_AQUI
       FRONTEND_URL: http://localhost:5173
     depends_on:
       - db
