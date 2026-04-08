@@ -9,6 +9,8 @@
   import { onMount } from "svelte";
   // goto permite navegar a otra ruta programáticamente
   import { goto } from "$app/navigation";
+  // Importamos footer
+  import Footer from "$lib/components/Footer.svelte";
 
   // $props() recibe las props del componente. "children" es el contenido
   // de las páginas hijas que se renderizará dentro de este layout
@@ -201,6 +203,14 @@
   {/if}
 </nav>
 
-<!-- {@render children()} renderiza el contenido de la página actual
-     dentro de este layout. Es como un "slot" en versiones anteriores de Svelte -->
-{@render children()}
+<!-- 
+  {@render children()} renderiza el contenido de la página actual
+  dentro de este layout. Es como un "slot" en versiones anteriores de Svelte -->
+<!-- 
+  Envolvemos todo en un div flex columna para que el footer
+  siempre quede pegado abajo aunque la página tenga poco contenido
+-->
+<div class="min-h-screen flex flex-col">
+  {@render children()}
+  <Footer />
+</div>

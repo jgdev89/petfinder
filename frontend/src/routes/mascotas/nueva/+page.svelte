@@ -8,6 +8,15 @@
   import { get } from "svelte/store";
   // Funciones para crear la mascota y subir su imagen al backend
   import { crearMascota, subirImagen } from "$lib/api.js";
+  // onMount se ejecuta cuando el componente se monta en el DOM
+  import { onMount } from "svelte";
+
+  // Protección de ruta: si no hay sesión activa al cargar la página, redirige al login
+  onMount(() => {
+    if (!get(token)) {
+      goto("/login");
+    }
+  });
 
   // Variables reactivas del formulario
   let tipo = $state("perdida");
@@ -27,7 +36,7 @@
     cargando = true;
     error = "";
     const tokenActual = get(token);
-    // Si no hay sesión activa, redirigimos al login
+    // Si no hay sesión activa, redirigimos al login (doble seguridad)
     if (!tokenActual) {
       goto("/login");
       return;
