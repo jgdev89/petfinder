@@ -18,10 +18,10 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      SENDGRID_API_KEY: TU_API_KEY_AQUI
-      EMAIL_REMITENTE: TU_EMAIL_AQUI
-      FRONTEND_URL: http://localhost:5173
+      DATABASE_URL: mysql+pymysql://petfinder_user:petfinder_pass@db:3306/petfinder
     depends_on:
       - db
     volumes:
