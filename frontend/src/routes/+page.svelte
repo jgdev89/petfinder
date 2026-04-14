@@ -7,6 +7,7 @@
   import Mapa from "$lib/Mapa.svelte";
   // onMount ejecuta código cuando el componente se carga en el navegador
   import { onMount } from "svelte";
+  import { slide } from "svelte/transition";
 
   // $state() es la forma de declarar variables reactivas en Svelte 5.
   // Cuando cambian, el HTML se actualiza automáticamente.
@@ -140,7 +141,7 @@
 
   <!-- El mapa solo se renderiza si mostrarMapa es true -->
   {#if mostrarMapa}
-    <div class="mb-6 rounded-xl overflow-hidden">
+    <div transition:slide class="mb-6 rounded-xl overflow-hidden">
       <!-- Pasamos la lista de mascotas al componente Mapa como prop -->
       <Mapa {mascotas} />
     </div>
