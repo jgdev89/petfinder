@@ -14,10 +14,10 @@
 
   // $state() declara variables reactivas en Svelte 5.
   // Cuando cambian, el HTML se actualiza automáticamente.
-  let mascotas = $state([]);      // Lista completa de mascotas del backend
-  let cargando = $state(true);    // Controla si mostramos "Cargando..."
+  let mascotas = $state([]);       // Lista completa de mascotas del backend
+  let cargando = $state(true);     // Controla si mostramos "Cargando..."
   let mostrarMapa = $state(false); // Controla si el mapa está visible
-  let paginaActual = $state(1);   // Página activa en la paginación
+  let paginaActual = $state(1);    // Página activa en la paginación
 
   // Variables reactivas para cada filtro del buscador
   let filtroTipo = $state("");
@@ -66,7 +66,6 @@
   });
 </script>
 
-<!-- svelte:head permite modificar el <head> del HTML, como el título de la pestaña -->
 <svelte:head>
   <title>PetFinder — Encuentra a tu mascota</title>
 </svelte:head>
@@ -75,8 +74,8 @@
 
   <!-- Sección hero: título y subtítulo centrados -->
   <div class="text-center mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">Encuentra a tu mascota</h1>
-    <p class="text-gray-500">Casos de mascotas perdidas y encontradas en España</p>
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Encuentra a tu mascota</h1>
+    <p class="text-gray-500 dark:text-gray-400">Casos de mascotas perdidas y encontradas en España</p>
   </div>
 
   <!-- Buscador y filtros -->
@@ -90,7 +89,7 @@
       bind:value={filtroNombre}
       placeholder="🔍 Buscar por nombre..."
       oninput={cargarMascotas}
-      class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-orange-400 transition-colors"
+      class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-orange-400 transition-colors"
     />
 
     <div class="flex flex-wrap gap-2">
@@ -98,7 +97,7 @@
       <!-- Select de tipo: bind:value sincroniza con filtroTipo.
            aria-label mejora la accesibilidad para lectores de pantalla -->
       <select bind:value={filtroTipo} aria-label="Filtrar por tipo" onchange={cargarMascotas}
-        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400">
+        class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todos los tipos</option>
         <option value="perdida">Perdida</option>
         <option value="encontrada">Encontrada</option>
@@ -106,9 +105,8 @@
 
       <!-- Select de especie: genera las opciones dinámicamente desde el array ESPECIES -->
       <select bind:value={filtroEspecie} aria-label="Filtrar por especie" onchange={cargarMascotas}
-        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400">
+        class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todas las especies</option>
-        <!-- #each itera sobre el array y crea una <option> por cada elemento -->
         {#each ESPECIES as especie}
           <option value={especie}>{especie}</option>
         {/each}
@@ -116,7 +114,7 @@
 
       <!-- Select de provincia: igual que el de especie pero con PROVINCIAS -->
       <select bind:value={filtroProvincia} aria-label="Filtrar por provincia" onchange={cargarMascotas}
-        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-orange-400">
+        class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todas las provincias</option>
         {#each PROVINCIAS as provincia}
           <option value={provincia}>{provincia}</option>
@@ -126,14 +124,14 @@
       <!-- Botón limpiar: resetea todos los filtros y recarga las mascotas -->
       <button
         onclick={() => { filtroTipo = ""; filtroEspecie = ""; filtroProvincia = ""; filtroNombre = ""; cargarMascotas(); }}
-        class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 bg-white hover:bg-gray-50 cursor-pointer transition-colors">
+        class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
         Limpiar
       </button>
 
       <!-- Botón mapa: alterna entre mostrar y ocultar el mapa.
            Las clases cambian dinámicamente según el estado de mostrarMapa -->
       <button
-        class="px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors {mostrarMapa ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}"
+        class="px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors {mostrarMapa ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}"
         onclick={() => (mostrarMapa = !mostrarMapa)}>
         {mostrarMapa ? "Ocultar mapa" : "🗺️ Ver en mapa"}
       </button>
@@ -151,18 +149,18 @@
 
   <!-- Renderizado condicional según el estado de la carga -->
   {#if cargando}
-    <div class="text-center py-16 text-gray-400">Cargando...</div>
+    <div class="text-center py-16 text-gray-400 dark:text-gray-500">Cargando...</div>
 
   {:else if mascotas.length === 0}
     <!-- Si no hay mascotas que coincidan con los filtros -->
-    <div class="text-center py-16 text-gray-400">
+    <div class="text-center py-16 text-gray-400 dark:text-gray-500">
       <p class="text-4xl mb-3">🐾</p>
       <p>No hay mascotas que coincidan con los filtros.</p>
     </div>
 
   {:else}
     <!-- Contador de resultados y página actual -->
-    <p class="text-sm text-gray-400 mb-4">
+    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">
       {mascotas.length} {mascotas.length === 1 ? 'resultado' : 'resultados'}
       · Página {paginaActual} de {totalPaginas}
     </p>
@@ -174,7 +172,7 @@
       {#each mascotasPagina as mascota}
         <!-- Cada tarjeta es un enlace al detalle de la mascota -->
         <a href="/mascotas/{mascota.id}" class="no-underline">
-          <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+          <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
 
             <!-- Si tiene imagen la mostramos, si no mostramos un emoji placeholder -->
             {#if mascota.imagenes && mascota.imagenes.length > 0}
@@ -184,22 +182,22 @@
                 class="w-full h-48 object-cover"
               />
             {:else}
-              <div class="w-full h-48 bg-orange-50 flex items-center justify-center text-4xl">🐾</div>
+              <div class="w-full h-48 bg-orange-50 dark:bg-gray-700 flex items-center justify-center text-4xl">🐾</div>
             {/if}
 
             <div class="p-4">
               <div class="flex items-center gap-2 mb-2">
                 <!-- Badge de tipo: rojo si perdida, verde si encontrada -->
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full {mascota.tipo === 'perdida' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full {mascota.tipo === 'perdida' ? 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300' : 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300'}">
                   {mascota.tipo}
                 </span>
-                <span class="text-xs text-gray-500">{mascota.especie}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{mascota.especie}</span>
               </div>
               <!-- ?? es el operador nullish: si nombre es null muestra "Sin nombre" -->
-              <h2 class="font-semibold text-gray-800 text-base mb-1">{mascota.nombre ?? "Sin nombre"}</h2>
-              <p class="text-xs text-gray-500 mb-2">📍 {mascota.localidad}, {mascota.provincia}</p>
+              <h2 class="font-semibold text-gray-800 dark:text-gray-100 text-base mb-1">{mascota.nombre ?? "Sin nombre"}</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">📍 {mascota.localidad}, {mascota.provincia}</p>
               <!-- line-clamp-2 limita el texto a 2 líneas con puntos suspensivos -->
-              <p class="text-sm text-gray-500 line-clamp-2">{mascota.descripcion ?? ""}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{mascota.descripcion ?? ""}</p>
             </div>
           </div>
         </a>
@@ -214,7 +212,7 @@
         <button
           onclick={() => irAPagina(paginaActual - 1)}
           disabled={paginaActual === 1}
-          class="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors">
+          class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors">
           ← Anterior
         </button>
 
@@ -223,7 +221,7 @@
         {#each Array.from({ length: totalPaginas }, (_, i) => i + 1) as n}
           <button
             onclick={() => irAPagina(n)}
-            class="px-3 py-2 rounded-lg border text-sm cursor-pointer transition-colors {n === paginaActual ? 'bg-orange-500 text-white border-orange-500' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}">
+            class="px-3 py-2 rounded-lg border text-sm cursor-pointer transition-colors {n === paginaActual ? 'bg-orange-500 text-white border-orange-500' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}">
             {n}
           </button>
         {/each}
@@ -232,7 +230,7 @@
         <button
           onclick={() => irAPagina(paginaActual + 1)}
           disabled={paginaActual === totalPaginas}
-          class="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors">
+          class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors">
           Siguiente →
         </button>
 
