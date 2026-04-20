@@ -10,3 +10,4 @@ cryptography
 python-jose[cryptography]
 python-multipart
 sendgrid
+requests

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import date, datetime
 
@@ -7,7 +7,7 @@ from datetime import date, datetime
 # los schemas representan qué datos se exponen o se aceptan por HTTP.
 
 
-# --- Usuarios ---
+# ─── Usuarios ───────────────────────────────────────────────────────────────────
 
 # Schema para CREAR un usuario (datos que manda el frontend al registrarse)
 class UsuarioCreate(BaseModel):
@@ -26,22 +26,27 @@ class UsuarioResponse(BaseModel):
     fecha_registro: datetime
 
     class Config:
-        from_attributes = True  # Permite crear este schema desde un objeto SQLAlchemy directamente
+        from_attributes = True  # Permite crear este schema desde un objeto SQLAlchemy
 
 
-# --- Mascotas ---
+# ─── Mascotas ───────────────────────────────────────────────────────────────────
 
 # Schema para CREAR una publicación de mascota
+# El frontend manda estos campos; el backend añade usuario_id, estado y fecha
 class MascotaCreate(BaseModel):
-    tipo: str              # "perdida" o "encontrada"
+    tipo: str                       # "perdida" o "encontrada"
     nombre: Optional[str] = None
-    especie: str           # "perro", "gato", etc.
+    especie: str                    # "Perro", "Gato", etc.
     raza: Optional[str] = None
     color: Optional[str] = None
     descripcion: Optional[str] = None
     provincia: str
-    localidad: str
-    fecha_suceso: date     # Solo fecha, sin hora
+    localidad: str = Field(pattern=r"^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s'\-]+$")  # Solo letras españolas
+    fecha_suceso: date              # Solo fecha, sin hora
+    # Coordenadas opcionales: el backend las rellena llamando a Nominatim.
+    # Si la geocodificación falla, quedan como None y la mascota no aparece en el mapa.
+    latitud: Optional[str] = None
+    longitud: Optional[str] = None
 
 # Schema para DEVOLVER una imagen asociada a una mascota
 class ImagenResponse(BaseModel):
@@ -65,15 +70,19 @@ class MascotaResponse(BaseModel):
     provincia: str
     localidad: str
     fecha_suceso: date
-    estado: str            # "activa", "resuelta", etc.
+    estado: str            # "activo" o "resuelto"
     fecha_publicacion: datetime
+    # Coordenadas geográficas guardadas al publicar mediante Nominatim
+    # Optional porque pueden ser None si la geocodificación falló
+    latitud: Optional[str] = None
+    longitud: Optional[str] = None
     imagenes: list[ImagenResponse] = []  # Lista de fotos asociadas (puede estar vacía)
 
     class Config:
         from_attributes = True
 
 
-# --- Mensajes ---
+# ─── Mensajes ───────────────────────────────────────────────────────────────────
 
 # Schema para ENVIAR un mensaje a otro usuario
 class MensajeCreate(BaseModel):
@@ -97,7 +106,7 @@ class MensajeResponse(BaseModel):
         from_attributes = True
 
 
-# --- Reseteo de contraseña ---
+# ─── Reseteo de contraseña ──────────────────────────────────────────────────────
 
 # Schema para el paso 1: el usuario manda su email para recibir el enlace
 class SolicitarReseteo(BaseModel):
@@ -105,5 +114,5 @@ class SolicitarReseteo(BaseModel):
 
 # Schema para el paso 2: el usuario manda el token del email + su nueva contraseña
 class ResetearPassword(BaseModel):
-    token: str             # Token único generado al solicitar el reseteo (llega por URL desde el email)
+    token: str             # Token único que llega por URL desde el email
     nueva_password: str

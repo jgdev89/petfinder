@@ -39,6 +39,11 @@ class Mascota(Base):
     provincia   = Column(String(100), nullable=False)
     localidad   = Column(String(100), nullable=False)
 
+    # Coordenadas geográficas obtenidas de Nominatim al publicar.
+    # Son opcionales (nullable=True) por si la geocodificación falla.
+    latitud     = Column(String(20))   # Ej: "43.5453"
+    longitud    = Column(String(20))   # Ej: "-5.6615"
+
     fecha_suceso     = Column(Date, nullable=False)                     # Solo fecha, sin hora
     estado           = Column(Enum("activo", "resuelto"), default="activo")
     fecha_publicacion = Column(DateTime, default=func.now())
