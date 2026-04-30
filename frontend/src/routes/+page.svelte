@@ -25,50 +25,120 @@
   let filtroProvincia = $state("");
   let filtroNombre = $state("");
 
+  // ── Carrusel ──────────────────────────────────────────────────────────────
+  // Cada slide tiene una imagen (en /static/) y el texto que aparece encima
+  const slides = [
+    { imagen: "/hero1.jpg", titulo: "Ayudando a reunir familias desde 2025", subtitulo: "Porque cada mascota merece volver a casa" },
+    { imagen: "/hero2.jpg", titulo: "Miles de mascotas han vuelto a casa", subtitulo: "Publica tu caso y llega a toda España" },
+    { imagen: "/hero3.jpg", titulo: "Publica, encuentra, reúnete", subtitulo: "La comunidad más grande de mascotas perdidas" },
+  ];
+
+  // Índice del slide activo
+  let slideActual = $state(0);
+  let intervaloCarrusel;
+
+  // Avanza al siguiente slide (vuelve al primero cuando llega al final)
+  function siguienteSlide() {
+    slideActual = (slideActual + 1) % slides.length;
+  }
+
+  // Retrocede al slide anterior
+  function anteriorSlide() {
+    slideActual = (slideActual - 1 + slides.length) % slides.length;
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   // $derived calcula valores derivados de otras variables reactivas.
-  // Se recalculan automáticamente cada vez que cambia mascotas o paginaActual.
-
-  // Total de páginas: dividimos el total de mascotas entre las que caben por página
   let totalPaginas = $derived(Math.ceil(mascotas.length / POR_PAGINA));
-
-  // Mascotas de la página actual: slice extrae solo el trozo del array que corresponde
-  // Ejemplo: página 2 con 9 por página → slice(9, 18)
   let mascotasPagina = $derived(
     mascotas.slice((paginaActual - 1) * POR_PAGINA, paginaActual * POR_PAGINA)
   );
 
-  // Función asíncrona que pide las mascotas al backend con los filtros activos
   async function cargarMascotas() {
     cargando = true;
-    paginaActual = 1; // Siempre volvemos a la página 1 al cambiar filtros
-
-    // Construimos el objeto de filtros solo con los que tienen valor
+    paginaActual = 1;
     const filtros = {};
     if (filtroTipo) filtros.tipo = filtroTipo;
     if (filtroEspecie) filtros.especie = filtroEspecie;
     if (filtroProvincia) filtros.provincia = filtroProvincia;
     if (filtroNombre) filtros.nombre = filtroNombre;
-
-    // Llamamos al backend y guardamos el resultado en mascotas
     mascotas = await listarMascotas(filtros);
     cargando = false;
   }
 
-  // Cambia a la página indicada y hace scroll suave al inicio de la página
   function irAPagina(n) {
     paginaActual = n;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // onMount: se ejecuta una sola vez cuando la página termina de cargarse
   onMount(() => {
     cargarMascotas();
+    // El carrusel avanza automáticamente cada 5 segundos
+    intervaloCarrusel = setInterval(siguienteSlide, 5000);
+    // Limpiamos el intervalo cuando el componente se desmonta
+    return () => clearInterval(intervaloCarrusel);
   });
 </script>
 
 <svelte:head>
   <title>PetFinder — Encuentra a tu mascota</title>
 </svelte:head>
+
+<!-- ── CARRUSEL HERO ─────────────────────────────────────────────────────── -->
+<!-- El carrusel va fuera del max-w-5xl para ocupar todo el ancho de pantalla -->
+<div class="relative w-full h-72 sm:h-96 overflow-hidden">
+
+  <!-- Imagen de fondo del slide activo -->
+  <img
+    src={slides[slideActual].imagen}
+    alt="Hero"
+    class="w-full h-full object-cover transition-opacity duration-700"
+  />
+
+  <!-- Overlay oscuro semitransparente para que el texto sea legible -->
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <!-- Texto centrado encima de la imagen -->
+  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+    <h1 class="text-white text-2xl sm:text-4xl font-bold drop-shadow-lg mb-2">
+      {slides[slideActual].titulo}
+    </h1>
+    <p class="text-white/90 text-sm sm:text-lg drop-shadow">
+      {slides[slideActual].subtitulo}
+    </p>
+    <!-- Botón de llamada a la acción -->
+    <a href="/mascotas/nueva"
+      class="mt-6 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-full no-underline transition-colors text-sm sm:text-base">
+      Publicar mascota
+    </a>
+  </div>
+
+  <!-- Botón anterior -->
+  <button
+    onclick={anteriorSlide}
+    class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white border-none rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors text-lg">
+    ‹
+  </button>
+
+  <!-- Botón siguiente -->
+  <button
+    onclick={siguienteSlide}
+    class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white border-none rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors text-lg">
+    ›
+  </button>
+
+  <!-- Puntos indicadores de slide -->
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+    {#each slides as _, i}
+      <button
+        onclick={() => slideActual = i}
+        class="w-2 h-2 rounded-full border-none cursor-pointer transition-colors {i === slideActual ? 'bg-white' : 'bg-white/40'}">
+      </button>
+    {/each}
+  </div>
+
+</div>
+<!-- ──────────────────────────────────────────────────────────────────────── -->
 
 <main class="max-w-5xl mx-auto px-4 py-8">
 
@@ -81,9 +151,7 @@
   <!-- Buscador y filtros -->
   <div class="flex flex-col gap-3 mb-6">
 
-    <!-- Input de búsqueda por nombre.
-         bind:value sincroniza el valor con filtroNombre.
-         oninput llama a cargarMascotas cada vez que el usuario escribe -->
+    <!-- Input de búsqueda por nombre -->
     <input
       type="text"
       bind:value={filtroNombre}
@@ -94,8 +162,6 @@
 
     <div class="flex flex-wrap gap-2">
 
-      <!-- Select de tipo: bind:value sincroniza con filtroTipo.
-           aria-label mejora la accesibilidad para lectores de pantalla -->
       <select bind:value={filtroTipo} aria-label="Filtrar por tipo" onchange={cargarMascotas}
         class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todos los tipos</option>
@@ -103,7 +169,6 @@
         <option value="encontrada">Encontrada</option>
       </select>
 
-      <!-- Select de especie: genera las opciones dinámicamente desde el array ESPECIES -->
       <select bind:value={filtroEspecie} aria-label="Filtrar por especie" onchange={cargarMascotas}
         class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todas las especies</option>
@@ -112,7 +177,6 @@
         {/each}
       </select>
 
-      <!-- Select de provincia: igual que el de especie pero con PROVINCIAS -->
       <select bind:value={filtroProvincia} aria-label="Filtrar por provincia" onchange={cargarMascotas}
         class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-orange-400">
         <option value="">Todas las provincias</option>
@@ -121,15 +185,12 @@
         {/each}
       </select>
 
-      <!-- Botón limpiar: resetea todos los filtros y recarga las mascotas -->
       <button
         onclick={() => { filtroTipo = ""; filtroEspecie = ""; filtroProvincia = ""; filtroNombre = ""; cargarMascotas(); }}
         class="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
         Limpiar
       </button>
 
-      <!-- Botón mapa: alterna entre mostrar y ocultar el mapa.
-           Las clases cambian dinámicamente según el estado de mostrarMapa -->
       <button
         class="px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors {mostrarMapa ? 'bg-orange-500 text-white border border-orange-500' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}"
         onclick={() => (mostrarMapa = !mostrarMapa)}>
@@ -138,43 +199,32 @@
     </div>
   </div>
 
-  <!-- El mapa solo se renderiza si mostrarMapa es true.
-       transition:slide añade una animación de deslizamiento al aparecer/desaparecer -->
   {#if mostrarMapa}
     <div transition:slide class="mb-6 rounded-xl overflow-hidden">
-      <!-- Pasamos la lista completa de mascotas al componente Mapa como prop -->
       <Mapa {mascotas} />
     </div>
   {/if}
 
-  <!-- Renderizado condicional según el estado de la carga -->
   {#if cargando}
     <div class="text-center py-16 text-gray-400 dark:text-gray-500">Cargando...</div>
 
   {:else if mascotas.length === 0}
-    <!-- Si no hay mascotas que coincidan con los filtros -->
     <div class="text-center py-16 text-gray-400 dark:text-gray-500">
       <p class="text-4xl mb-3">🐾</p>
       <p>No hay mascotas que coincidan con los filtros.</p>
     </div>
 
   {:else}
-    <!-- Contador de resultados y página actual -->
     <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">
       {mascotas.length} {mascotas.length === 1 ? 'resultado' : 'resultados'}
       · Página {paginaActual} de {totalPaginas}
     </p>
 
-    <!-- Grid de tarjetas: 1 columna en móvil, 2 en tablet, 3 en escritorio -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Iteramos sobre mascotasPagina (solo las de la página actual) en lugar
-           de mascotas completo. Esto es lo que implementa la paginación visual. -->
       {#each mascotasPagina as mascota}
-        <!-- Cada tarjeta es un enlace al detalle de la mascota -->
         <a href="/mascotas/{mascota.id}" class="no-underline">
           <div class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
 
-            <!-- Si tiene imagen la mostramos, si no mostramos un emoji placeholder -->
             {#if mascota.imagenes && mascota.imagenes.length > 0}
               <img
                 src="http://localhost:8000{mascota.imagenes[0].url}"
@@ -187,16 +237,13 @@
 
             <div class="p-4">
               <div class="flex items-center gap-2 mb-2">
-                <!-- Badge de tipo: rojo si perdida, verde si encontrada -->
                 <span class="text-xs font-semibold px-2 py-0.5 rounded-full {mascota.tipo === 'perdida' ? 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300' : 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300'}">
                   {mascota.tipo}
                 </span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{mascota.especie}</span>
               </div>
-              <!-- ?? es el operador nullish: si nombre es null muestra "Sin nombre" -->
               <h2 class="font-semibold text-gray-800 dark:text-gray-100 text-base mb-1">{mascota.nombre ?? "Sin nombre"}</h2>
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">📍 {mascota.localidad}, {mascota.provincia}</p>
-              <!-- line-clamp-2 limita el texto a 2 líneas con puntos suspensivos -->
               <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{mascota.descripcion ?? ""}</p>
             </div>
           </div>
@@ -204,11 +251,8 @@
       {/each}
     </div>
 
-    <!-- Controles de paginación: solo se muestran si hay más de una página -->
     {#if totalPaginas > 1}
       <div class="flex justify-center items-center gap-2 mt-8">
-
-        <!-- Botón anterior: desactivado si estamos en la primera página -->
         <button
           onclick={() => irAPagina(paginaActual - 1)}
           disabled={paginaActual === 1}
@@ -216,8 +260,6 @@
           ← Anterior
         </button>
 
-        <!-- Botones numerados: uno por cada página.
-             Array.from genera un array [1, 2, 3, ...totalPaginas] -->
         {#each Array.from({ length: totalPaginas }, (_, i) => i + 1) as n}
           <button
             onclick={() => irAPagina(n)}
@@ -226,14 +268,12 @@
           </button>
         {/each}
 
-        <!-- Botón siguiente: desactivado si estamos en la última página -->
         <button
           onclick={() => irAPagina(paginaActual + 1)}
           disabled={paginaActual === totalPaginas}
           class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors">
           Siguiente →
         </button>
-
       </div>
     {/if}
   {/if}
