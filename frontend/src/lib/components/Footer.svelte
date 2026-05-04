@@ -57,8 +57,8 @@
         -->
         <ul class="space-y-2 text-sm">
           <li><a href="/" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Inicio</a></li>
-          <li><a href="/mascotas/perdidas" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Mascotas perdidas</a></li>
-          <li><a href="/mascotas/encontradas" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Mascotas encontradas</a></li>
+          <li><a href="/?tipo=perdida" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Mascotas perdidas</a></li>
+          <li><a href="/?tipo=encontrada" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Mascotas encontradas</a></li>
           <li><a href="/como-funciona" class="text-amber-600 dark:text-gray-400 hover:text-amber-800 dark:hover:text-orange-400 transition-colors">Cómo funciona</a></li>
         </ul>
       </div>
