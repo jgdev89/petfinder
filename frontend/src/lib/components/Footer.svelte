@@ -33,15 +33,10 @@
 
       <!-- COLUMNA 1: Marca -->
       <div>
-        <!-- 
-          Nombre de la app con emoji de huella
-          dark:text-orange-400 → naranja más suave para no saturar en fondo oscuro
-        -->
-        <h3 class="text-amber-700 dark:text-orange-400 font-semibold text-lg mb-2">🐾 PetFinder</h3>
-        <!-- 
-          Tagline corto
-          dark:text-gray-400 → gris suave en modo oscuro, legible sin saturar
-        -->
+        <h3 class="text-amber-700 dark:text-orange-400 font-semibold text-lg mb-2 flex items-center gap-2">
+        <img src="src/lib/assets/favicon.png" alt="PetFinder" class="w-6 h-6" />
+          PetFinder
+        </h3>
         <p class="text-amber-600 dark:text-gray-400 text-sm">Ayudando a reunir familias desde 2025</p>
       </div>
 

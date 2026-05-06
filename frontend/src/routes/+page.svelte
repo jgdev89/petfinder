@@ -209,9 +209,8 @@
     <div class="text-center py-16 text-gray-400 dark:text-gray-500">Cargando...</div>
 
   {:else if mascotas.length === 0}
-    <div class="text-center py-16 text-gray-400 dark:text-gray-500">
-      <p class="text-4xl mb-3">🐾</p>
-      <p>No hay mascotas que coincidan con los filtros.</p>
+    <div class="w-full h-48 bg-orange-50 dark:bg-gray-700 flex items-center justify-center">
+      <img src="/favicon.png" alt="sin foto" class="w-16 h-16 opacity-40" />
     </div>
 
   {:else}
@@ -232,7 +231,9 @@
                 class="w-full h-48 object-cover"
               />
             {:else}
-              <div class="w-full h-48 bg-orange-50 dark:bg-gray-700 flex items-center justify-center text-4xl">🐾</div>
+              <div class="w-full h-48 bg-orange-50 dark:bg-gray-700 flex items-center justify-center">
+                <img src="/favicon.png" alt="sin foto" class="w-16 h-16 opacity-40" />
+              </div>
             {/if}
 
             <div class="p-4">

@@ -45,7 +45,7 @@
   >
     <!-- Cabecera -->
     <div class="text-center mb-2">
-      <p class="text-3xl mb-2">🐾</p>
+      <img src="/favicon.png" alt="PetFinder" class="w-12 h-12 mx-auto mb-2" />
       <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
         Crear cuenta
       </h1>

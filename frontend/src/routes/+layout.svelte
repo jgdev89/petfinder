@@ -2,7 +2,7 @@
   // Importamos los estilos globales de Tailwind
   import "../app.css";
   // Importamos el favicon (icono de la pestaña del navegador)
-  import favicon from "$lib/assets/favicon.svg";
+  import favicon from "$lib/assets/favicon.png";
   // Importamos las funciones de autenticación y el store del token
   import { recuperarSesion, cerrarSesion, token } from "$lib/auth.js";
   // onMount ejecuta código cuando el componente se monta en el navegador
@@ -64,7 +64,7 @@
 
 <!-- svelte:head permite modificar el <head> del HTML desde cualquier componente -->
 <svelte:head>
-  <link rel="icon" href={favicon} />
+  <link rel="icon" type="image/png" href={favicon} />
 </svelte:head>
 
 <!-- Barra de navegación fija en la parte superior (sticky) -->
@@ -73,12 +73,10 @@
 >
   <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
     <!-- Logo que lleva al inicio -->
-    <a
-      href="/"
-      class="text-xl font-bold text-orange-500 tracking-tight no-underline"
-    >
-      🐾 PetFinder
-    </a>
+    <a href="/" class="flex items-center gap-2 no-underline">
+    <img src={favicon} alt="PetFinder" class="w-8 h-8" />
+    <span class="text-xl font-bold text-orange-500 tracking-tight">PetFinder</span>
+  </a>
 
     <!-- Botón hamburguesa: solo visible en móvil (md:hidden).
          Al pulsarlo abre o cierra el menú móvil -->
